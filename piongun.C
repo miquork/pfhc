@@ -22,7 +22,8 @@ bool filterP = false;
 // Testing corrections
 bool usePFHC = false;
 bool usePFEC = false;
-bool applyPFEC = true;
+bool applyPFEC_Charged = false;
+bool applyPFEC_Neutral = true;
 
 void piongun::Loop()
 {
@@ -224,9 +225,14 @@ void piongun::Loop()
     if (usePFEC) {
       if (eff>0) corr = pfecE / (rawEcal+rawHcal);
     }
-    if (applyPFEC) {
+    if (applyPFEC_Charged) {
       double corrEcal(rawEcal), corrHcal(rawHcal);
       if (eff>0) pfec->energyEmHad(genP, corrEcal, corrHcal, genEta, 0.);
+      corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
+    }
+    if (applyPFEC_Neutral) {
+      double corrEcal(rawEcal), corrHcal(rawHcal);
+      if (eff>0) pfec->energyEmHad(-1, corrEcal, corrHcal, genEta, 0.);
       corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
     }
     resp *= corr;
