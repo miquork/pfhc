@@ -13,6 +13,7 @@
 
 #include "TProfile2D.h"
 #include "TProfile3D.h"
+#include "TH3D.h"
 
 #include <iostream>
 
@@ -127,6 +128,11 @@ void piongun::Loop()
     vfe[i] = 0.9+0.1/10*(i-30);
   }
   vfe[nfe] = 1+1e-4; // ensure fE==1 does not go to overflow
+
+  // Response bins
+  const int nr = 400;
+  double vr[nr+1];
+  for (int i = 0; i != nr+1; ++i) vr[i] = i*(4.-0.)/nr;
   
   TDirectory *curdir = gDirectory;
   TFile *fout = new TFile("piongun.root","RECREATE");
@@ -191,6 +197,12 @@ void piongun::Loop()
   p3cf = new TProfile3D("p3cf",";|#eta_{gen}|;p_{T,gen} (GeV);f_{ECAL,raw}"
 			"Correction^{-1}",neta,veta, npt,vpt, nfe,vfe);
 
+  // For resolution studies
+  TH3D *h3r, *h3c;
+  h3r = new TH3D("h3r",";|#eta_{gen}|;p_{T,gen} (GeV);Response;",
+		 neta,veta, npt,vpt, nr,vr);
+  h3c = new TH3D("h3c",";|#eta_{gen}|;p_{T,gen} (GeV);Correction^{-1};",
+		 neta,veta, npt,vpt, nr,vr);
   
   curdir->cd();
 
@@ -272,9 +284,12 @@ void piongun::Loop()
 	h2rf_ec2->Fill(genPt, fe);
       }
 
-      if (resp>0 && resp<3.)
-	p3rf->Fill(abseta, genPt, fe, resp);
+      //if (resp>0 && resp<3.)
+      p3rf->Fill(abseta, genPt, fe, resp);
       p3cf->Fill(abseta, genPt, fe, 1./corr);
+
+      h3r->Fill(abseta, genPt, resp);
+      h3c->Fill(abseta, genPt, 1./corr);
     } // eff>0
 
   }
