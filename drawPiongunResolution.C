@@ -237,7 +237,8 @@ void drawPiongunResolution(string file = "", string file2 = "") {
   
   // Draw the histogram using TDR style
   TH1D *h = tdrHist("h","RMS",0,1.0,"p_{T,gen} (GeV)",0.2,1000.);
-  lumi_136TeV = "Winter24 PionGun";
+  //lumi_136TeV = "Winter24 PionGun";
+  lumi_136TeV = "Winter25 PionGun";
   extraText = "Private";
   TCanvas *c1 = tdrCanvas("c1", h, 8, 11, kSquare);
   gPad->SetLogx();

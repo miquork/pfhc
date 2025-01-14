@@ -2,6 +2,8 @@
 //          - maps of reconstruction efficiency vs pT, |eta|
 //          - confusion rate between E and EH hadrons vs pT, |eta|
 //          - power law fits to response vs pT in bins of |eta|
+#ifndef __drawPiongun_C__
+#define __drawPiongun_C__
 #include "TFile.h"
 #include "TProfile2D.h"
 #include "TProfile3D.h"
@@ -17,6 +19,9 @@
 
 // Conrado Munoz Diaz's tuple format
 bool useCMD = true;
+
+// Individual plots vs eta (lots of them, so slow)
+bool drawVsEta = false;
 
 void drawPiongun(string file = "", bool isClosure = false) {
 
@@ -68,11 +73,17 @@ void drawPiongun(string file = "", bool isClosure = false) {
   
   // Draw hadron detection efficiency in 2D
   /////////////////////////////////////////
+
+  const double maxe1 = 300; // 5000
+  const double maxe2 = 1000; // 5000
   
   TH1D *h1e = tdrHist("h1e","|#eta_{gen}|",0,3.139,
-		      "p_{T,gen} (GeV)",0.2,300);
+		      //"p_{T,gen} (GeV)",0.2,300); // v1
+		      //"p_{T,gen} (GeV)",0.2,5000); // v2
+		      "p_{T,gen} (GeV)",0.2,maxe1); // v2
   extraText = "Private";
-  lumi_136TeV = "Winter24 piongun";
+  //lumi_136TeV = "Winter24 piongun";
+  lumi_136TeV = "Winter25 piongun";
   TCanvas *c1e = tdrCanvas("c1e",h1e,8,11,kRectangular);
   gPad->SetLogx();
   gPad->SetRightMargin(0.15);
@@ -97,7 +108,9 @@ void drawPiongun(string file = "", bool isClosure = false) {
   /////////////////////////////////////////
   
   TH1D *h1e1 = tdrHist("h1e1","Efficiency",0,1.2,
-		      "p_{T,gen} (GeV)",0.2,300);
+		       //"p_{T,gen} (GeV)",0.2,300); // v1
+		       //"p_{T,gen} (GeV)",0.2,5000); // v2
+		       "p_{T,gen} (GeV)",0.2,maxe1); // v2
   TCanvas *c1e1 = tdrCanvas("c1e1",h1e1,8,11,kSquare);
   gPad->SetLogx();
 
@@ -126,7 +139,9 @@ void drawPiongun(string file = "", bool isClosure = false) {
   /////////////////////////////////////////////////////////x
   
   TH1D *h2h = tdrHist("h1h","|#eta_{gen}|",0,3.139,
-		      "p_{T,gen} (GeV)",0.2,300);
+		      //"p_{T,gen} (GeV)",0.2,300); // v1
+		      //"p_{T,gen} (GeV)",0.2,5000); // v2
+		      "p_{T,gen} (GeV)",0.2,maxe1); // v2
   TCanvas *c2h = tdrCanvas("c2h",h2h,8,11,kRectangular);
   gPad->SetLogx();
   gPad->SetRightMargin(0.15);
@@ -641,7 +656,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
     
     c5f->cd(ieta);
     TH1D *hf = tdrHist(Form("h5f_%d",ieta),"(rawECAL+rawHCAL)/genP",
-		       0.2+1e-4,1.2-1e-5,
+		       //0.2+1e-4,1.2-1e-5,
+		       0.0+1e-4,1.3-1e-5,
 		       "rawEcal/(rawEcal+rawHcal)",0,1);
     if (useCMD) hf->SetYTitle("(ecal+hcal)/true");
     if (useCMD) hf->SetXTitle("ecal/(ecal+hcal)");
@@ -721,7 +737,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 	  tdrDraw(pfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
 	  if (ieta==1) {
 	    leg5f->AddEntry(pfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
-	    leg5f->SetY1NDC(leg5f->GetY1NDC()-0.05*1.5);
+	    //leg5f->SetY1NDC(leg5f->GetY1NDC()-0.05*1.5);
+	    leg5f->SetY2NDC(leg5f->GetY2NDC()-0.05*1.5);
 	  }
 	  
 	  if (f1f->GetNDF()>0) {
@@ -745,7 +762,9 @@ void drawPiongun(string file = "", bool isClosure = false) {
     gPad->SetLogx();
 
     TH1D *h = tdrHist(Form("h5_%d",ieta),"(rawECAL+rawHCAL)/genP",0+1e-5,1.3,
-		      "p_{T,gen} (GeV)",0.2,1000.-1e-3);
+		      //"p_{T,gen} (GeV)",0.2,1000.-1e-3); // v1
+		      //"p_{T,gen} (GeV)",0.2,5000.-1e-3); // v2
+		      "p_{T,gen} (GeV)",0.2,maxe2-1e-3); // v2
     if (useCMD) h->SetYTitle("(ecal+hcal)/true");
     if (useCMD) h->SetXTitle("true/cosh(eta) (GeV)");
     if (useCMD && isClosure) h->SetYTitle("corrected (ecal+hcal)/true");
@@ -1060,7 +1079,9 @@ void drawPiongun(string file = "", bool isClosure = false) {
       double eps = 1e-4;
       TH1D *h5i = tdrHist(Form("h5i_%d",ieta),"(rawEcal+rawHcal)/genP",
 			  0.+eps,1.3-eps,
-			  "p_{T,gen} (GeV)",0.2,1000-eps);
+			  //"p_{T,gen} (GeV)",0.2,1000-eps); // v1
+			  //"p_{T,gen} (GeV)",0.2,5000-eps); // v2
+			  "p_{T,gen} (GeV)",0.2,maxe2-eps); // v2
       if (useCMD) h5i->SetYTitle("(ecal+hcal)/true");
       if (useCMD) h5i->SetXTitle("true/cosh(eta) (GeV)");
       TCanvas *c5i = tdrCanvas(Form("c5_%d",ieta),h5i,8,11,kSquare);
@@ -1086,6 +1107,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
       //legi->Draw();
 
+      if (drawVsEta)
       c5i->SaveAs(Form("pdf/vsEta/drawPionGun_respHE_eta_%04.0f_%04.0f.pdf",
 		       1000*(eta-deta),1000.*(eta+deta)));
       
@@ -1354,3 +1376,4 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   
 } // drawPiongun
+#endif

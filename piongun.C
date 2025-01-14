@@ -17,14 +17,16 @@
 
 #include <iostream>
 
-// Filter with p>0
-bool filterP = false;
+// Filter with p>0 and/or charge!=0
+// Without this |eta|<2.322 high E end seems bad
+bool filterP = false;//true;//false;//v1
+bool filterC = true;
 
 // Testing corrections
 bool usePFHC = false;
 bool usePFEC = false;
 bool applyPFEC_Charged = false;
-bool applyPFEC_Neutral = true;
+bool applyPFEC_Neutral = true;//false;//true;
 
 void piongun::Loop()
 {
@@ -71,10 +73,10 @@ void piongun::Loop()
        << endl << flush;
   
   fChain->SetBranchStatus("*",0);
-  //fChain->SetBranchStatus("genP",1);
-  fChain->SetBranchStatus("true",1);
-  //fChain->SetBranchStatus("genEta",1);
-  fChain->SetBranchStatus("eta",1);
+  fChain->SetBranchStatus("true",1); // v1, 20241031
+  //fChain->SetBranchStatus("genP",1); // v2
+  fChain->SetBranchStatus("eta",1); // v1, 20241031
+  //fChain->SetBranchStatus("genEta",1); // v2
   //fChain->SetBranchStatus("rawEcal",1);
   fChain->SetBranchStatus("ecal",1);
   //fChain->SetBranchStatus("rawHcal",1);
@@ -82,6 +84,8 @@ void piongun::Loop()
   //fChain->SetBranchStatus("ho",1);
   if (filterP) fChain->SetBranchStatus("p",1);
 
+  fChain->SetBranchStatus("charge",1); // v4
+  
   if (usePFHC) fChain->SetBranchStatus("PFHC_energy",1);
   if (usePFEC) fChain->SetBranchStatus("PFEC_energy",1);
   
@@ -101,11 +105,11 @@ void piongun::Loop()
     {0.2, 0.3, 0.4, 0.5, 0.7, 1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0,
      5, 6, 8, 10, 12, 15, 18, 21, 24, 28, 32, 37, 43, 49, 56, 64, 74, 84,
      97, 114, 133, 153, 174, 196, 220, 245, 272, 300, 330, 362, 395, 430, 468,
-     507, 548, 592, 638, 686, 737, 790, 846, 905, 967, 1000};
-     //1032, 1101, 1172, 1248,
-     //1327, 1410, 1497, 1588, 1684, 1784, 1890, 2000, 2116, 2238, 2366, 2500,
-     //2640, 2787, 2941, 3103, 3273, 3450, 3637, 3832, 4037, 4252, 4477, 4713,
-     //4961, 5220, 5492, 5777, 6076, 6389, 6717, 7000};
+     507, 548, 592, 638, 686, 737, 790, 846, 905, 967, 1000,
+     1032, 1101, 1172, 1248,
+     1327, 1410, 1497, 1588, 1684, 1784, 1890, 2000, 2116, 2238, 2366, 2500,
+     2640, 2787, 2941, 3103, 3273, 3450, 3637, 3832, 4037, 4252, 4477, 4713,
+     5000};//4961, 5220, 5492, 5777, 6076, 6389, 6717, 7000};
   double npt = sizeof(vpt) / sizeof(vpt[0]) - 1;
 
   /*
@@ -217,14 +221,20 @@ void piongun::Loop()
 
     double abseta = fabs(genEta);
     double genPt = genP/cosh(genEta);
-    double fe = ((rawHcal+rawEcal)>0 ? rawEcal / (rawEcal+rawHcal) :
-		 (jentry%3==0 ? 0 : 1));
+    //double fe = ((rawHcal+rawEcal)>0 ? rawEcal / (rawEcal+rawHcal) :
+    //		 (jentry%3==0 ? 0 : 1)); // v1
+    double fe = ((rawHcal+rawEcal)>0 ? rawEcal / (rawEcal+rawHcal) : 1); // v2
     double resp = (genP>0 ? (rawEcal+rawHcal) / genP : 0);
     //double eff = ((rawHcal+rawEcal)>0 ? 1 : 0);
     // Patch Conrado Munoz Diaz's tuples for p==0 in tracker coverage
     // Patch V2 tup[les with !filterP for missing p altogether
-    double eff = ((rawHcal+rawEcal)>0 && (!filterP || (p>0 || abseta>2.5))
-		  && genP>0 ? 1 : 0);
+    double eff = ((rawHcal+rawEcal)>0 && genP>0 &&
+		  (!filterP || (p>0 || abseta>2.5)) &&
+		  //&& genP>0 ? 1 : 0);
+		  //&& genP>0 && charge!=0 ? 1 : 0);
+		  //&& genP>0 && (charge!=0 || abseta>2.65) ? 1 : 0);
+		  //&& genP>0 && (charge!=0 || abseta>2.5) ? 1 : 0);
+		  (!filterC || (charge!=0 || abseta>2.322)) ? 1 : 0);
     bool ish = (fe<0.01);// as in drawPionGun.C
     bool ise = (fe>0.2 && fe<0.8);// as in drawPionGun.C
     assert(!(ish && ise));
