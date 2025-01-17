@@ -22,11 +22,13 @@
 bool filterP = false;//true;//false;//v1
 bool filterC = true;
 
-// Testing corrections
+// Testing corrections from Conrado stored in tuple
 bool usePFHC = false;
 bool usePFEC = false;
-bool applyPFEC_Charged = false;
-bool applyPFEC_Neutral = true;//false;//true;
+
+// Testing corrections in PFEnergyCalibrationFromMikko.cc + piongun*.txt
+bool applyPFEC_Charged = false;        // use charged/true energy
+bool applyPFEC_Neutral = true;//false; // use calorimeter energy
 
 void piongun::Loop()
 {
@@ -248,11 +250,13 @@ void piongun::Loop()
     if (usePFEC) {
       if (eff>0) corr = pfecE / (rawEcal+rawHcal);
     }
+    // Predict calorimeter response based on track/true E (genP here)
     if (applyPFEC_Charged) {
       double corrEcal(rawEcal), corrHcal(rawHcal);
       if (eff>0) pfec->energyEmHad(genP, corrEcal, corrHcal, genEta, 0.);
       corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
     }
+    // Predict calo response based on measured E (-1 => use corrEcal+corrHcal)
     if (applyPFEC_Neutral) {
       double corrEcal(rawEcal), corrHcal(rawHcal);
       if (eff>0) pfec->energyEmHad(-1, corrEcal, corrHcal, genEta, 0.);
