@@ -73,16 +73,17 @@ void piongun::Loop()
        << endl << flush;
   
   fChain->SetBranchStatus("*",0);
-  fChain->SetBranchStatus("true",1); // v1, 20241031
-  //fChain->SetBranchStatus("genP",1); // v2
-  fChain->SetBranchStatus("eta",1); // v1, 20241031
-  //fChain->SetBranchStatus("genEta",1); // v2
+  fChain->SetBranchStatus("true",1); // v1, 20241031 // 2025
+  //fChain->SetBranchStatus("genP",1); // v2 // 2025_v2
+  fChain->SetBranchStatus("eta",1); // v1, 20241031 // 2025
+  //fChain->SetBranchStatus("genEta",1); // v2 // 2025_v2
   //fChain->SetBranchStatus("rawEcal",1);
   fChain->SetBranchStatus("ecal",1);
   //fChain->SetBranchStatus("rawHcal",1);
   fChain->SetBranchStatus("hcal",1);
   //fChain->SetBranchStatus("ho",1);
-  if (filterP) fChain->SetBranchStatus("p",1);
+  //if (filterP) fChain->SetBranchStatus("p",1);
+  if (filterP) fChain->SetBranchStatus("trkP",1);
 
   fChain->SetBranchStatus("charge",1); // v4
   

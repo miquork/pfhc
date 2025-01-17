@@ -15,8 +15,14 @@ void mk_piongun() {
   //c->AddFile("/Users/voutila/Downloads/2024_smallSampleII/2024_smallSampleII_merged.root");
 
   //c->AddFile("../data/piongun/Conrado-20241031_smallSample.root");
-  c->AddFile("../data/piongun/2025_E0p2to200GeV.root");
-  c->AddFile("../data/piongun/2025_E200to500GeV.root");
+  //c->AddFile("../data/piongun/2025_E0p2to200GeV.root");
+  //c->AddFile("../data/piongun/2025_E200to500GeV.root");
+  c->AddFile("../data/piongun/2025_E0p2to200GeV_v2.root");
+  c->AddFile("../data/piongun/2025_E200to500GeV_v2.root");
+
+  // Winter24 refence for resolution
+  //c->AddFile("../data/piongun/2024_E0p2to200GeV_v10.root");
+  //c->AddFile("../data/piongun/2024_E200to500GeV_v9.root");
   
   piongun pg(c);
   pg.Loop();

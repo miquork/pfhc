@@ -34,7 +34,8 @@ public :
    Float_t         genEta; //eta; // Q: is eta genEta?
    Float_t         phi;
   */
-   Int_t           charge;
+   Int_t           charge; // 2025
+   //Double_t           charge; // 20241031
    vector<float>   *dr;
    vector<float>   *Eecal;
    vector<float>   *Ehcal;
@@ -48,14 +49,27 @@ public :
    ULong64_t       evt;
    ULong64_t       lumiBlock;
    ULong64_t       time;
+  
+  Float_t         hcalDepthFractions[7]; // 2025
 
    // New tuples from Conrado change variable types
-   Float_t         p; // not there, just placeholder
+  /*(
+   //Float_t         p; // v1: not there, just placeholder => v2: trkP
+   Double_t        p; // v2: trkP
    Double_t        genP;//true;
    Double_t        rawEcal;//ecal;
    Double_t        rawHcal;//hcal;
    Double_t        genEta;//eta;
    Double_t        phi;
+  */
+  // 2025
+   Float_t        p; // v2: trkP
+   Float_t        genP;//true;
+   Float_t        rawEcal;//ecal;
+   Float_t        rawHcal;//hcal;
+   Float_t        genEta;//eta;
+   Float_t        phi;
+
   //Double_t        PFHC_energy;
   //Double_t        PFEC_energy;
   //Double_t        PFHC_closure;
@@ -63,6 +77,7 @@ public :
    Double_t          pfecE;
    Double_t          pfhcE;
 
+  
    // List of branches
    TBranch        *b_true;   //!
    TBranch        *b_p;   //!
@@ -86,6 +101,8 @@ public :
    TBranch        *b_lumiBlock;   //!
    TBranch        *b_time;   //!
 
+   TBranch        *b_hcalDepthFractions;   //!
+  
    TBranch        *b_pfecE;
    TBranch        *b_pfhcE;
 
@@ -168,18 +185,22 @@ void piongun::Init(TTree *tree)
    fChain->SetMakeClass(1);
 
    // //fChain->SetBranchAddress("true", &true, &b_true);
-   fChain->SetBranchAddress("true", &genP, &b_true);
-   //fChain->SetBranchAddress("p", &p, &b_p);
+   fChain->SetBranchAddress("true", &genP, &b_true); // v1, 20241031; // 2025
+   //fChain->SetBranchAddress("genP", &genP, &b_true); // v2, 2025_v2
+   //fChain->SetBranchAddress("p", &p, &b_p); // 2025
+   fChain->SetBranchAddress("trkP", &p, &b_p); // 2025_v2
+   //fChain->SetBranchAddress("trkP", &p, &b_p); // v2
    //fChain->SetBranchAddress("ecal", &ecal, &b_ecal);
    fChain->SetBranchAddress("ecal", &rawEcal, &b_ecal);
    //fChain->SetBranchAddress("hcal", &hcal, &b_hcal);
    fChain->SetBranchAddress("hcal", &rawHcal, &b_hcal);
    //fChain->SetBranchAddress("ho", &ho, &b_ho);
    // //fChain->SetBranchAddress("eta", &eta, &b_eta);
-   fChain->SetBranchAddress("eta", &genEta, &b_eta);
+   fChain->SetBranchAddress("eta", &genEta, &b_eta); // v1, 20241031 // 2025
+   //fChain->SetBranchAddress("genEta", &genEta, &b_eta); // v1 // 2025_v2
    fChain->SetBranchAddress("phi", &phi, &b_phi);
+   fChain->SetBranchAddress("charge", &charge, &b_charge); // v3
    /*
-   fChain->SetBranchAddress("charge", &charge, &b_charge);
    fChain->SetBranchAddress("dr", &dr, &b_dr);
    fChain->SetBranchAddress("Eecal", &Eecal, &b_Eecal);
    fChain->SetBranchAddress("Ehcal", &Ehcal, &b_Ehcal);
@@ -195,8 +216,10 @@ void piongun::Init(TTree *tree)
    fChain->SetBranchAddress("time", &time, &b_time);
    */
 
-   fChain->SetBranchAddress("PFEC_energy", &pfecE, &b_pfecE);
-   fChain->SetBranchAddress("PFHC_energy", &pfhcE, &b_pfhcE);
+   fChain->SetBranchAddress("hcalDepthFractions", hcalDepthFractions, &b_hcalDepthFractions);
+
+   fChain->SetBranchAddress("PFEC_energy", &pfecE, &b_pfecE); // v1
+   fChain->SetBranchAddress("PFHC_energy", &pfhcE, &b_pfhcE); // v1
    
    Notify();
 }
