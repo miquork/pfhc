@@ -586,9 +586,14 @@ void drawPiongun(string file = "", bool isClosure = false) {
   ///////////////////////////////////////////////////////////
   // Complete 3D analysis in eta(x), pT(y), fe(z); 30 bins //
   ///////////////////////////////////////////////////////////
-  
+
   TCanvas *c5 = new TCanvas("c5","c5",6*300,5*300);
   c5->Divide(6,5,0,0);
+
+  // Store data to .root for easier comparison between years
+  TFile *fo = new TFile("drawPiongun.root","RECREATE");
+  curdir->cd();
+  
   TCanvas *c5f = new TCanvas("c5f","c5f",6*300,5*300);
   c5f->Divide(6,5,0,0);
   const int neta = 6*5;
@@ -610,6 +615,9 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   // Load full eta,pT,f_ECAL 3D map of single-pion response
   TProfile3D *p3 = (TProfile3D*)f->Get("p3rf"); assert(p3);
+  fo->cd();
+  p3->Write("profile3D_x_abseta_y_genPt_z_fe_val_resp");
+  curdir->cd();
   
   // Map to store graphs of the fit results
   map<string, map<int, TGraphErrors*> > mg;
@@ -785,6 +793,17 @@ void drawPiongun(string file = "", bool isClosure = false) {
     tdrDraw(hee,"Pz",kOpenDiamond,kMagenta+2, kSolid,-1,kNone,0, 1.0);
     tdrDraw(heh,"Pz",kOpenDiamond,kOrange+2, kSolid,-1,kNone,0, 1.0);
 
+    // Store data to drawPiongun.root
+    fo->cd();
+    int iy1(1000.*(eta-deta)), iy2(1000.*(eta+deta));
+    pa->Write(Form("response_all_hadrons_eta%04d_%04d",iy1,iy2));
+    ph->Write(Form("response_h_hadrons_eta%04d_%04d",iy1,iy2));
+    pe->Write(Form("response_eh_hadrons_eta%04d_%04d",iy1,iy2));
+    hee->Write(Form("response_e_of_eh_hadrons_eta%04d_%04d",iy1,iy2));
+    heh->Write(Form("response_h_of_eh_hadrons_eta%04d_%04d",iy1,iy2));
+    curdir->cd();
+    // end store to drawPiongun.root
+    
     double ptmin = 5.; // broadly safe, expect parts of EC
     double ptmax = 500./cosh(eta);
     double fixm_a = 0;//0.60; // 0 for free
@@ -924,6 +943,17 @@ void drawPiongun(string file = "", bool isClosure = false) {
     f1eh->SetLineStyle(kDotted);
     f1eh->DrawClone("SAME");
 
+    // Store fits to drawPiongun.root
+    fo->cd();
+    //int iy1(1000.*(eta-deta)), iy2(1000.*(eta+deta));
+    f1a->Write(Form("fit_all_hadrons_eta%04d_%04d",iy1,iy2));
+    f1h->Write(Form("fit_h_hadrons_eta%04d_%04d",iy1,iy2));
+    f1e->Write(Form("fit_eh_hadrons_eta%04d_%04d",iy1,iy2));
+    f1ee->Write(Form("fit_e_of_eh_hadrons_eta%04d_%04d",iy1,iy2));
+    f1eh->Write(Form("fit_h_of_eh_hadrons_eta%04d_%04d",iy1,iy2));
+    curdir->cd();
+    // end store to drawPiongun.root
+    
     gPad->RedrawAxis();
 
     // Draw legend in the last empty pad
@@ -1116,6 +1146,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   } // for ieta
 
   c5->SaveAs("pdf/drawPionGun_respHE_3D.pdf");
+  fo->Close();
+  
   c5f->SaveAs("pdf/drawPionGun_respFE_3D.pdf");
 
   
