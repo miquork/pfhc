@@ -74,8 +74,10 @@ public :
   //Double_t        PFEC_energy;
   //Double_t        PFHC_closure;
   //Double_t        PFEC_closure;
-   Double_t          pfecE;
-   Double_t          pfhcE;
+  //Double_t          pfecE;
+  //Double_t          pfhcE;
+   Float_t          pfecE; // 2025_v2 closure
+   Float_t          pfhcE; // 2025_v2 closure
 
   
    // List of branches
@@ -185,8 +187,8 @@ void piongun::Init(TTree *tree)
    fChain->SetMakeClass(1);
 
    // //fChain->SetBranchAddress("true", &true, &b_true);
-   fChain->SetBranchAddress("true", &genP, &b_true); // v1, 20241031; // 2025
-   //fChain->SetBranchAddress("genP", &genP, &b_true); // v2, 2025_v2
+   //fChain->SetBranchAddress("true", &genP, &b_true); // v1, 20241031; // 2025
+   fChain->SetBranchAddress("genP", &genP, &b_true); // v2, 2025_v2, closure
    //fChain->SetBranchAddress("p", &p, &b_p); // 2025
    fChain->SetBranchAddress("trkP", &p, &b_p); // 2025_v2
    //fChain->SetBranchAddress("trkP", &p, &b_p); // v2
@@ -196,8 +198,8 @@ void piongun::Init(TTree *tree)
    fChain->SetBranchAddress("hcal", &rawHcal, &b_hcal);
    //fChain->SetBranchAddress("ho", &ho, &b_ho);
    // //fChain->SetBranchAddress("eta", &eta, &b_eta);
-   fChain->SetBranchAddress("eta", &genEta, &b_eta); // v1, 20241031 // 2025
-   //fChain->SetBranchAddress("genEta", &genEta, &b_eta); // v1 // 2025_v2
+   //fChain->SetBranchAddress("eta", &genEta, &b_eta); // v1, 20241031 // 2025
+   fChain->SetBranchAddress("genEta", &genEta, &b_eta); // v1 // 2025_v2,closure
    fChain->SetBranchAddress("phi", &phi, &b_phi);
    fChain->SetBranchAddress("charge", &charge, &b_charge); // v3
    /*

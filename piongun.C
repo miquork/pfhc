@@ -23,12 +23,12 @@ bool filterP = false;//true;//false;//v1
 bool filterC = true;
 
 // Testing corrections from Conrado stored in tuple
-bool usePFHC = false;
+bool usePFHC = false;//true;//false;
 bool usePFEC = false;
 
 // Testing corrections in PFEnergyCalibrationFromMikko.cc + piongun*.txt
-bool applyPFEC_Charged = false;        // use charged/true energy
-bool applyPFEC_Neutral = true;//false; // use calorimeter energy
+bool applyPFEC_Charged = true;//false;        // use charged/true energy
+bool applyPFEC_Neutral = true;//false;//true;//false; // use calorimeter energy
 
 void piongun::Loop()
 {
@@ -75,10 +75,10 @@ void piongun::Loop()
        << endl << flush;
   
   fChain->SetBranchStatus("*",0);
-  fChain->SetBranchStatus("true",1); // v1, 20241031 // 2025
-  //fChain->SetBranchStatus("genP",1); // v2 // 2025_v2
-  fChain->SetBranchStatus("eta",1); // v1, 20241031 // 2025
-  //fChain->SetBranchStatus("genEta",1); // v2 // 2025_v2
+  //fChain->SetBranchStatus("true",1); // v1, 20241031 // 2025
+  fChain->SetBranchStatus("genP",1); // v2 // 2025_v2
+  //fChain->SetBranchStatus("eta",1); // v1, 20241031 // 2025
+  fChain->SetBranchStatus("genEta",1); // v2 // 2025_v2, closure
   //fChain->SetBranchStatus("rawEcal",1);
   fChain->SetBranchStatus("ecal",1);
   //fChain->SetBranchStatus("rawHcal",1);
@@ -211,6 +211,22 @@ void piongun::Loop()
   h3c = new TH3D("h3c",";|#eta_{gen}|;p_{T,gen} (GeV);Correction^{-1};",
 		 neta,veta, npt,vpt, nr,vr);
   
+  // Store new PFEC as a friend treee
+  TFile *outFriend(0);
+  TTree *friendTree(0);
+  Float_t PFECC_energy(0.0);
+  Float_t PFECN_energy(0.0);
+  if (applyPFEC_Charged || applyPFEC_Neutral) {
+    outFriend = new TFile("piongunFriend.root","RECREATE");
+    friendTree = new TTree("piongunFriend","piongunFriend");
+  }
+  if (applyPFEC_Charged) {
+    friendTree->Branch("PFECC_energy",&PFECC_energy,"PFECC_energy/F");
+  }
+  if (applyPFEC_Neutral) {
+    friendTree->Branch("PFECN_energy",&PFECN_energy,"PFECN_energy/F");
+  }
+
   curdir->cd();
 
   Long64_t nbytes = 0, nb = 0;
@@ -232,12 +248,14 @@ void piongun::Loop()
     // Patch Conrado Munoz Diaz's tuples for p==0 in tracker coverage
     // Patch V2 tup[les with !filterP for missing p altogether
     double eff = ((rawHcal+rawEcal)>0 && genP>0 &&
+		  (!usePFHC || (pfhcE>0 && pfhcE<13000.)) &&
 		  (!filterP || (p>0 || abseta>2.5)) &&
 		  //&& genP>0 ? 1 : 0);
 		  //&& genP>0 && charge!=0 ? 1 : 0);
 		  //&& genP>0 && (charge!=0 || abseta>2.65) ? 1 : 0);
 		  //&& genP>0 && (charge!=0 || abseta>2.5) ? 1 : 0);
-		  (!filterC || (charge!=0 || abseta>2.322)) ? 1 : 0);
+		  (!filterC || (charge!=0 || abseta>2.322)) ? 1 : 0); // W25
+    //(!filterC || (charge!=0 || abseta>2.65)) ? 1 : 0); // W24
     bool ish = (fe<0.01);// as in drawPionGun.C
     bool ise = (fe>0.2 && fe<0.8);// as in drawPionGun.C
     assert(!(ish && ise));
@@ -255,13 +273,16 @@ void piongun::Loop()
       double corrEcal(rawEcal), corrHcal(rawHcal);
       if (eff>0) pfec->energyEmHad(genP, corrEcal, corrHcal, genEta, 0.);
       corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
+      PFECC_energy = (corrEcal+corrHcal);
     }
     // Predict calo response based on measured E (-1 => use corrEcal+corrHcal)
     if (applyPFEC_Neutral) {
       double corrEcal(rawEcal), corrHcal(rawHcal);
       if (eff>0) pfec->energyEmHad(-1, corrEcal, corrHcal, genEta, 0.);
       corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
+      PFECN_energy = (corrEcal+corrHcal);
     }
+    if (applyPFEC_Charged || applyPFEC_Neutral) friendTree->Fill();
     resp *= corr;
     
     p2e->Fill(genPt, abseta, eff);
@@ -311,4 +332,7 @@ void piongun::Loop()
 
   fout->Write();
   fout->Close();
+
+  friendTree->Write();
+  outFriend->Close();
 }

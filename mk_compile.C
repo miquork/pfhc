@@ -16,4 +16,6 @@
   //gROOT->ProcessLine(".L PFEnergyCalibrationFromMikko.cc+g");
   gROOT->ProcessLine(".L piongun.C+g");
 
+  gROOT->ProcessLine(".L PFAna.C+g");
+
 }

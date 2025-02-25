@@ -17,8 +17,17 @@ void mk_piongun() {
   //c->AddFile("../data/piongun/Conrado-20241031_smallSample.root");
   //c->AddFile("../data/piongun/2025_E0p2to200GeV.root");
   //c->AddFile("../data/piongun/2025_E200to500GeV.root");
+
+  // Winter25v2 (beamspot+HE scale)
+  //c->AddFile("2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU.root");
+  //c->AddFile("2025_0p2to5000GeV_withCorrections_and_PowerLaw_withPU.root");
+  
+  // Winter25v1
   c->AddFile("../data/piongun/2025_E0p2to200GeV_v2.root");
   c->AddFile("../data/piongun/2025_E200to500GeV_v2.root");
+  // Winter25 PFHC closure
+  //c->AddFile("../data/piongun/2025_0p2to200GeV_withCorrections.root");
+  //c->AddFile("../data/piongun/2025_200to500GeV_withCorrections.root");
 
   // Winter24 refence for resolution
   //c->AddFile("../data/piongun/2024_E0p2to200GeV_v10.root");
