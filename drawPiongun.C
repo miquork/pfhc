@@ -23,6 +23,16 @@ bool useCMD = true;
 // Individual plots vs eta (lots of them, so slow)
 bool drawVsEta = false;
 
+// Filter small errors out (needed for withPU sample)
+void filterErr(TH1D *h, double minErr) {
+  for (int i = 1; i != h->GetNbinsX()+1; ++i) {
+    if (h->GetBinError(i)<minErr) {
+      h->SetBinContent(i, 0.);      
+      h->SetBinError(i, 0.);
+    }
+  }
+}
+
 void drawPiongun(string file = "", bool isClosure = false) {
 
   TDirectory *curdir = gDirectory;
@@ -438,7 +448,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
     TH1D *h = p2rf_bb->ProjectionY(Form("h%1.0f",pt),j,j,"o");
 
     tdrDraw(h,"Pz",kNone,color[i]);
-
+    
     double fmin = max(f1mip->Eval(pt)*1.5,0.10);
     double fmax = min(0.80,1-2.0/pt);
     f1rf->SetRange(fmin,fmax);
@@ -611,7 +621,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   double refa = (isClosure ? 0 : 1) ;
   
   c5f->cd(neta);
-  TLegend *leg5f = tdrLeg(0.05,0.90,0.55,0.90);
+  //TLegend *leg5f = tdrLeg(0.05,0.90,0.55,0.90);
+  TLegend *leg5f = tdrLeg(0.05,0.90-0.05*1.5*6,0.55,0.90);
 
   // Load full eta,pT,f_ECAL 3D map of single-pion response
   TProfile3D *p3 = (TProfile3D*)f->Get("p3rf"); assert(p3);
@@ -697,9 +708,15 @@ void drawPiongun(string file = "", bool isClosure = false) {
       double h_thr = 2.0; // GeV
       f1f->SetRange(min(max(0.1,e_mip/pt),0.3), max(0.7,min(0.9,1-h_thr/pt)));
       int i50 = pfe->GetXaxis()->FindBin(0.50);
-      if (pfe->GetBinError(i50)!=0) {
 
-	TFitResultPtr fp1f = pfe->Fit(f1f,"QRNS"); // S to return fit result
+      TH1D *hfe = pfe->ProjectionX(Form("%s_hfe",pfe->GetName()));
+      if (ptmin<20.) filterErr(hfe, 0.001);
+
+      //if (pfe->GetBinError(i50)!=0) {
+      if (hfe->GetBinError(i50)!=0) {
+
+	//TFitResultPtr fp1f = pfe->Fit(f1f,"QRNS"); // S to return fit result
+	TFitResultPtr fp1f = hfe->Fit(f1f,"QRNS"); // S to return fit result
 
 	// Get the covariance matrix
 	TMatrixDSym covMatrix = fp1f->GetCovarianceMatrix();
@@ -742,11 +759,15 @@ void drawPiongun(string file = "", bool isClosure = false) {
 	if (pt>=5 && pt <=500 && (ipt-ipt5)%4==0) {
 	  c5f->cd(ieta);
 	    
-	  tdrDraw(pfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
+	  //tdrDraw(pfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
+	  tdrDraw(hfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
+	  
 	  if (ieta==1) {
-	    leg5f->AddEntry(pfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
+	    //leg5f->AddEntry(pfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
+	    leg5f->AddEntry(hfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
 	    //leg5f->SetY1NDC(leg5f->GetY1NDC()-0.05*1.5);
-	    leg5f->SetY2NDC(leg5f->GetY2NDC()-0.05*1.5);
+	    //leg5f->SetY2NDC(leg5f->GetY2NDC()-0.05*1.5);
+	    //leg5f->SetY2NDC(0.90-leg5f->GetNColumns()*0.05*1.5);
 	  }
 	  
 	  if (f1f->GetNDF()>0) {
