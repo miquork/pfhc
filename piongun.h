@@ -50,8 +50,11 @@ public :
    ULong64_t       lumiBlock;
    ULong64_t       time;
   
-  Float_t         hcalDepthFractions[7]; // 2025
+   Float_t         hcalDepthFractions[7]; // 2025
 
+   Float_t         rcEcal; // 2025v2
+   Float_t         rcHcal; // 2025v2
+  
    // New tuples from Conrado change variable types
   /*(
    //Float_t         p; // v1: not there, just placeholder => v2: trkP
@@ -89,6 +92,8 @@ public :
    TBranch        *b_eta;   //!
    TBranch        *b_phi;   //!
    TBranch        *b_charge;   //!
+   TBranch        *b_rcEcal;   //! 2025v2
+   TBranch        *b_rcHcal;   //! 2025v2
    TBranch        *b_dr;   //!
    TBranch        *b_Eecal;   //!
    TBranch        *b_Ehcal;   //!
@@ -202,6 +207,8 @@ void piongun::Init(TTree *tree)
    fChain->SetBranchAddress("genEta", &genEta, &b_eta); // v1 // 2025_v2,closure
    fChain->SetBranchAddress("phi", &phi, &b_phi);
    fChain->SetBranchAddress("charge", &charge, &b_charge); // v3
+   fChain->SetBranchAddress("rcEcal", &rcEcal, &b_rcEcal); // 2025v2
+   fChain->SetBranchAddress("rcHcal", &rcHcal, &b_rcHcal); // 2025v2
    /*
    fChain->SetBranchAddress("dr", &dr, &b_dr);
    fChain->SetBranchAddress("Eecal", &Eecal, &b_Eecal);

@@ -18,13 +18,26 @@ void mk_piongun() {
   //c->AddFile("../data/piongun/2025_E0p2to200GeV.root");
   //c->AddFile("../data/piongun/2025_E200to500GeV.root");
 
+  // New withRC Winter25v2 (beamspot+HE scale)
+  c->AddFile("../data/piongun/2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU_bfix.root");
+  //c->AddFile("../data/piongun/2025_0p2to500GeV_withCorrections_randomCone.root");
+
   // Winter25v2 (beamspot+HE scale)
-  //c->AddFile("2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU.root");
-  //c->AddFile("2025_0p2to5000GeV_withCorrections_and_PowerLaw_withPU.root");
+  //c->AddFile("../data/piongun/2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU.root"); // old
+  //c->AddFile("../data/piongun/2025_0p2to5000GeV_withCorrections_and_PowerLaw_withPU.root"); // old
+
+  // EE cuts test
+  //c->AddFile("../data/piongun/PFHC_0to200_EEcuts_0sigma.root");
+  //c->AddFile("../data/piongun/PFHC_0to200_EEcuts_4sigma.root");
+  //c->AddFile("../data/piongun/2025_Merged_NoPU_pionGun_zeroEcalThres_reduced.root");
+  //c->AddFile("../data/piongun/2025_Merged_NoPU_pionGun_1sigmaEcalThres_reduced.root");
+  //c->AddFile("../data/piongun/2025_Merged_NoPU_pionGun_2sigmaEcalThres_reduced.root");
+  //c->AddFile("../data/piongun/2025_Merged_NoPU_pionGun_3sigmaEcalThres_reduced.root");
+  //c->AddFile("../data/piongun/2025_Merged_NoPU_pionGun_4sigmaEcalThres_reduced.root");
   
   // Winter25v1
-  c->AddFile("../data/piongun/2025_E0p2to200GeV_v2.root");
-  c->AddFile("../data/piongun/2025_E200to500GeV_v2.root");
+  //c->AddFile("../data/piongun/2025_E0p2to200GeV_v2.root");
+  //c->AddFile("../data/piongun/2025_E200to500GeV_v2.root");
   // Winter25 PFHC closure
   //c->AddFile("../data/piongun/2025_0p2to200GeV_withCorrections.root");
   //c->AddFile("../data/piongun/2025_200to500GeV_withCorrections.root");

@@ -17,18 +17,26 @@
 
 #include <iostream>
 
+// Filter maximum E to compare merged sample to old
+bool filterMaxP = false;
+double maxP = 500;//5000;
+
 // Filter with p>0 and/or charge!=0
 // Without this |eta|<2.322 high E end seems bad
+// (Nuclear interactions? With cut efficiency at high E is low)
 bool filterP = false;//true;//false;//v1
 bool filterC = true;
+
+// Subtract Random Cone (necessary for withPU, optional for noPU)
+bool subRC = true;
 
 // Testing corrections from Conrado stored in tuple
 bool usePFHC = false;//true;//false;
 bool usePFEC = false;
 
 // Testing corrections in PFEnergyCalibrationFromMikko.cc + piongun*.txt
-bool applyPFEC_Charged = true;//false;        // use charged/true energy
-bool applyPFEC_Neutral = true;//false;//true;//false; // use calorimeter energy
+bool applyPFEC_Charged = false;        // use charged/true energy
+bool applyPFEC_Neutral = false;//true;//false; // use calorimeter energy
 
 void piongun::Loop()
 {
@@ -83,11 +91,13 @@ void piongun::Loop()
   fChain->SetBranchStatus("ecal",1);
   //fChain->SetBranchStatus("rawHcal",1);
   fChain->SetBranchStatus("hcal",1);
+  fChain->SetBranchStatus("rcEcal",1);
+  fChain->SetBranchStatus("rcHcal",1);
   //fChain->SetBranchStatus("ho",1);
   //if (filterP) fChain->SetBranchStatus("p",1);
   if (filterP) fChain->SetBranchStatus("trkP",1);
 
-  fChain->SetBranchStatus("charge",1); // v4
+  if (filterC || subRC) fChain->SetBranchStatus("charge",1); // v4
   
   if (usePFHC) fChain->SetBranchStatus("PFHC_energy",1);
   if (usePFEC) fChain->SetBranchStatus("PFEC_energy",1);
@@ -103,16 +113,21 @@ void piongun::Loop()
      4.363, 4.538, 4.716, 4.889, 5.191};
   const int neta = sizeof(veta) / sizeof(veta[0]) - 1;
 
-  // Inclusive jets pT binning adapted to single particle gun
+  // Inclusive jets pT binning adapted to single particle gun (x2 to x4)
   double vpt[] =
     {0.2, 0.3, 0.4, 0.5, 0.7, 1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0,
      5, 6, 8, 10, 12, 15, 18, 21, 24, 28, 32, 37, 43, 49, 56, 64, 74, 84,
-     97, 114, 133, 153, 174, 196, 220, 245, 272, 300, 330, 362, 395, 430, 468,
-     507, 548, 592, 638, 686, 737, 790, 846, 905, 967, 1000,
-     1032, 1101, 1172, 1248,
-     1327, 1410, 1497, 1588, 1684, 1784, 1890, 2000, 2116, 2238, 2366, 2500,
-     2640, 2787, 2941, 3103, 3273, 3450, 3637, 3832, 4037, 4252, 4477, 4713,
-     5000};//4961, 5220, 5492, 5777, 6076, 6389, 6717, 7000};
+     97, 133, 174, 220, 272, 330, 395, 507, 592, 686, 790, 905, 1032,
+     1327, 1684, 2116, 2640, 3273, 4037, 5000};
+  //97, 114, 133, 153, 174, 196, 220, 245, 272, 300, 330, 362, 395, 430, 468,
+  //507, 592, 686, 790, 905, 1032, 1327, 1684, 2116, 2640, 3273, 4037, 5000};
+  //507, 548, 592, 638, 686, 737, 790, 846, 905, 967, //1000,
+  // 1032, 1172, 1327, 1497, 1684, 1890, 2116, 2366,
+  // 2640, 2941, 3273, 3637, 4037, 4477, 5000};
+  //1032, 1101, 1172, 1248,
+  //1327, 1410, 1497, 1588, 1684, 1784, 1890, 2000, 2116, 2238, 2366, 2500,
+  //2640, 2787, 2941, 3103, 3273, 3450, 3637, 3832, 4037, 4252, 4477, 4713,
+  //5000};//4961, 5220, 5492, 5777, 6076, 6389, 6717, 7000};
   double npt = sizeof(vpt) / sizeof(vpt[0]) - 1;
 
   /*
@@ -147,7 +162,9 @@ void piongun::Loop()
   // MIP energy threshold in ECAL for considering hadron an H-hadron
   double e_mip = 1.;
   
-  TProfile2D *p2e, *p2h, *p2r_a, *p2r_h, *p2r_e;
+  TProfile2D *p2e_trk, *p2e, *p2h, *p2r_a, *p2r_h, *p2r_e;
+  p2e_trk = new TProfile2D("p2e_trk",";p_{T,gen} (GeV);#eta_{gen};"
+			   "Tracking efficiency",npt,vpt, 4*32, 0,3.2);
   p2e = new TProfile2D("p2e",";p_{T,gen} (GeV);#eta_{gen};Efficiency",
 		       npt,vpt, neta,veta);
   p2h = new TProfile2D("p2h",";p_{T,gen} (GeV);#eta_{gen};H fraction",
@@ -233,6 +250,8 @@ void piongun::Loop()
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
+
+    rcEcal = rcHcal = 0; // safety for noPU without these branches
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
 
@@ -244,17 +263,24 @@ void piongun::Loop()
     //		 (jentry%3==0 ? 0 : 1)); // v1
     double fe = ((rawHcal+rawEcal)>0 ? rawEcal / (rawEcal+rawHcal) : 1); // v2
     double resp = (genP>0 ? (rawEcal+rawHcal) / genP : 0);
+    if (charge==0) // 2025v2
+      resp = (genP>0 ? ((rawEcal-rcEcal)+(rawHcal-rcHcal)) / genP : 0);
     //double eff = ((rawHcal+rawEcal)>0 ? 1 : 0);
     // Patch Conrado Munoz Diaz's tuples for p==0 in tracker coverage
     // Patch V2 tup[les with !filterP for missing p altogether
     double eff = ((rawHcal+rawEcal)>0 && genP>0 &&
 		  (!usePFHC || (pfhcE>0 && pfhcE<13000.)) &&
-		  (!filterP || (p>0 || abseta>2.5)) &&
+		  (!filterMaxP || (genP<maxP)) &&
+		  (!filterP || (p>0 || abseta>2.6)) &&
+		  //(!filterP || (p>0 || abseta>2.5)) &&
 		  //&& genP>0 ? 1 : 0);
 		  //&& genP>0 && charge!=0 ? 1 : 0);
 		  //&& genP>0 && (charge!=0 || abseta>2.65) ? 1 : 0);
 		  //&& genP>0 && (charge!=0 || abseta>2.5) ? 1 : 0);
-		  (!filterC || (charge!=0 || abseta>2.322)) ? 1 : 0); // W25
+		  //(!filterC || (charge!=0 || abseta>2.322)) ? 1 : 0); // W25
+    		  (!filterC  || ((charge!=0 && abseta<2.6) ||
+				 (charge==0 && abseta>=2.6)))  // 2025v2
+		  ? 1 : 0);
     //(!filterC || (charge!=0 || abseta>2.65)) ? 1 : 0); // W24
     bool ish = (fe<0.01);// as in drawPionGun.C
     bool ise = (fe>0.2 && fe<0.8);// as in drawPionGun.C
@@ -263,28 +289,43 @@ void piongun::Loop()
     // Apply PFEC
     double corr(1.);
     if (usePFHC) {
-      if (eff>0) corr = pfhcE / (rawEcal+rawHcal);
+      if (eff>0 && charge!=0)
+	corr = pfhcE / (rawEcal+rawHcal);
+      if (eff>0 && ((rawEcal-rcEcal)+(rawHcal-rcHcal)>0) && charge==0)
+	corr = pfhcE / (rawEcal+rawHcal-rcEcal-rcHcal);
     }
     if (usePFEC) {
-      if (eff>0) corr = pfecE / (rawEcal+rawHcal);
+      if (eff>0 && charge!=0)
+	corr = pfecE / (rawEcal+rawHcal);
+      if (eff>0 && ((rawEcal-rcEcal)+(rawHcal-rcHcal)>0) && charge==0)
+	corr = pfecE / (rawEcal+rawHcal-rcEcal-rcHcal);
     }
     // Predict calorimeter response based on track/true E (genP here)
     if (applyPFEC_Charged) {
-      double corrEcal(rawEcal), corrHcal(rawHcal);
+      double corrEcal(charge!=0 ? rawEcal : rawEcal-rcEcal);
+      double corrHcal(charge!=0 ? rawHcal : rawHcal-rcHcal);
       if (eff>0) pfec->energyEmHad(genP, corrEcal, corrHcal, genEta, 0.);
-      corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
+      if (eff>0 && charge!= 0)
+	corr = (corrEcal+corrHcal)/(rawEcal+rawHcal);
+      if (eff>0 && ((rawEcal-rcEcal)+(rawHcal-rcHcal)>0) && charge==0)
+	corr = (corrEcal+corrHcal)/(rawEcal+rawHcal-rcEcal-rcHcal);
       PFECC_energy = (corrEcal+corrHcal);
     }
     // Predict calo response based on measured E (-1 => use corrEcal+corrHcal)
     if (applyPFEC_Neutral) {
-      double corrEcal(rawEcal), corrHcal(rawHcal);
+      double corrEcal(charge!=0 ? rawEcal : rawEcal-rcEcal);
+      double corrHcal(charge!=0 ? rawHcal : rawHcal-rcHcal);
       if (eff>0) pfec->energyEmHad(-1, corrEcal, corrHcal, genEta, 0.);
-      corr = (eff>0 ? (corrEcal+corrHcal)/(rawEcal+rawHcal) : 1);
+      if (eff>0 && charge!=0)
+	corr = (corrEcal+corrHcal)/(rawEcal+rawHcal);
+      if (eff>0 && ((rawEcal-rcEcal)+(rawHcal-rcHcal)>0) && charge==0)
+	corr = (corrEcal+corrHcal)/(rawEcal+rawHcal-rcEcal-rcHcal);
       PFECN_energy = (corrEcal+corrHcal);
     }
     if (applyPFEC_Charged || applyPFEC_Neutral) friendTree->Fill();
     resp *= corr;
-    
+
+    p2e_trk->Fill(genPt, abseta, charge!=0);
     p2e->Fill(genPt, abseta, eff);
     if (abseta<0.522) pe_bb0->Fill(genPt, eff);
     if (abseta<1.479) pe_bb->Fill(genPt, eff);

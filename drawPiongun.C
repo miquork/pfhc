@@ -33,6 +33,17 @@ void filterErr(TH1D *h, double minErr) {
   }
 }
 
+// Set minimum statistical error (add in quadrature)
+double _hhMinErr(0.008), _ehMinErr(0.006), _eeMinErr(0.014);
+void setMinErr(TH1D *h, double minErr) {
+  for (int i = 1; i != h->GetNbinsX()+1; ++i) {
+    double err = h->GetBinError(i);
+    if (err!=0) {
+      h->SetBinError(i, sqrt(err*err+minErr*minErr));
+    }
+  }
+}
+
 void drawPiongun(string file = "", bool isClosure = false) {
 
   TDirectory *curdir = gDirectory;
@@ -85,15 +96,12 @@ void drawPiongun(string file = "", bool isClosure = false) {
   /////////////////////////////////////////
 
   const double maxe1 = 300; // 5000
-  const double maxe2 = 1000; // 5000
+  const double maxe2 = 5000;//1000; // 5000
   
   TH1D *h1e = tdrHist("h1e","|#eta_{gen}|",0,3.139,
-		      //"p_{T,gen} (GeV)",0.2,300); // v1
-		      //"p_{T,gen} (GeV)",0.2,5000); // v2
-		      "p_{T,gen} (GeV)",0.2,maxe1); // v2
+		      "p_{T,gen} (GeV)",0.2,maxe1);
   extraText = "Private";
-  //lumi_136TeV = "Winter24 piongun";
-  lumi_136TeV = "Winter25 piongun";
+  lumi_136TeV = "Winter25v2 piongun";
   TCanvas *c1e = tdrCanvas("c1e",h1e,8,11,kRectangular);
   gPad->SetLogx();
   gPad->SetRightMargin(0.15);
@@ -104,7 +112,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.2,1.479,300,1.479);
   l->DrawLine(0.2,2.500,300,2.500);
@@ -118,15 +127,14 @@ void drawPiongun(string file = "", bool isClosure = false) {
   /////////////////////////////////////////
   
   TH1D *h1e1 = tdrHist("h1e1","Efficiency",0,1.2,
-		       //"p_{T,gen} (GeV)",0.2,300); // v1
-		       //"p_{T,gen} (GeV)",0.2,5000); // v2
-		       "p_{T,gen} (GeV)",0.2,maxe1); // v2
+		       "p_{T,gen} (GeV)",0.2,maxe1);
   TCanvas *c1e1 = tdrCanvas("c1e1",h1e1,8,11,kSquare);
   gPad->SetLogx();
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1);
+  //l->DrawLine(3.5,0,3.5,1);
+  l->DrawLine(5.0,0,5.0,1);
   l->DrawLine(2.5,0,2.5,1);
   l->DrawLine(0.7,0,0.7,0.5);
   l->DrawLine(0.2,0.84,300,0.84);
@@ -146,12 +154,10 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
 
   // Draw E/H identification rate (H-hadron fraction) in 2D
-  /////////////////////////////////////////////////////////x
+  /////////////////////////////////////////////////////////
   
   TH1D *h2h = tdrHist("h1h","|#eta_{gen}|",0,3.139,
-		      //"p_{T,gen} (GeV)",0.2,300); // v1
-		      //"p_{T,gen} (GeV)",0.2,5000); // v2
-		      "p_{T,gen} (GeV)",0.2,maxe1); // v2
+		      "p_{T,gen} (GeV)",0.2,maxe1);
   TCanvas *c2h = tdrCanvas("c2h",h2h,8,11,kRectangular);
   gPad->SetLogx();
   gPad->SetRightMargin(0.15);
@@ -168,7 +174,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.2,1.479,300,1.479);
   l->DrawLine(0.2,2.500,300,2.500);
@@ -198,7 +205,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -220,7 +228,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   if (isClosure) p2r_h->GetZaxis()->SetRangeUser(0.8,1.2);
   tdrDraw(p2r_h,"COL");
 
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -247,7 +256,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   }
   tdrDraw(p2r_a,"COLZ");
   
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -280,7 +290,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -301,7 +312,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   p2c_h->GetZaxis()->SetRangeUser(0,1.1);
   tdrDraw(p2c_h,"COL");
 
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -324,7 +336,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   p2c_a->GetZaxis()->SetTitle("Correction^{-1}");
   tdrDraw(p2c_a,"COLZ");
   
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -357,7 +370,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1.);
+  //l->DrawLine(3.5,0,3.5,1.);
+  l->DrawLine(5.0,0,5.0,1.);
   
   TF1 *f1mip = new TF1("f1mip","max([0]/x,[1])",0.7,300.);
   f1mip->SetParameters(1.,0.01);
@@ -427,7 +441,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
   TF1 *f1rf = new TF1("f1rf","[0]*(1-x)+[1]*x",0,1);
   TF1 *f1rfm = new TF1("f1rfm","[0]+[1]*(x-0.5)",0,1);
   
-  double vx[] = {5, 10, 20, 40, 80, 160, 320};
+  double vx[] = {5, 10, 20, 40, 80, 160, 320, 1280};//640};
   const int nx = sizeof(vx)/sizeof(vx[0]);
   int color[] = {kBlue, kGreen+2, kYellow+2, kOrange+1, kRed, kBlack, kGray+1};
   const int nc = sizeof(color)/sizeof(color[0]);
@@ -485,113 +499,6 @@ void drawPiongun(string file = "", bool isClosure = false) {
   gPad->RedrawAxis();
   c4f1->SaveAs("pdf/drawPionGun_fecal1D.pdf");
 
-  /*
-  // Repeat systematically for all the pT bins, plot [0] and [1]
-  TH1D *hre = p2rf_bb->ProjectionX("hre",0,-1,"o"); hre->Reset();
-  TH1D *hrh = p2rf_bb->ProjectionX("hrh",0,-1,"o"); hrh->Reset();
-  TH1D *hr = p2rf_bb->ProjectionX("hr",0,-1,"o"); hr->Reset();
-  for (int i = 1; i != p2rf_bb->GetNbinsX()+1; ++i) {
-    double pt = p2rf_bb->GetXaxis()->GetBinLowEdge(i);
-    TH1D *hrf = p2rf_bb->ProjectionY(Form("hrf%1.0f",pt),i,i,"o");
-    
-    double fmin = max(f1mip->Eval(pt)*1.5,0.10);
-    double fmax = min(0.80,1-2.0/pt);
-    f1rf->SetRange(fmin,fmax);
-    f1rf->SetParameters(0.75,-0.15);
-    f1rfm->SetRange(fmin,fmax);
-    f1rfm->SetParameters(0.675,-0.075);
-    if (hrf->Integral()>0) {
-      hrf->Fit(f1rf,"QRN");
-      hrf->Fit(f1rfm,"QRN");
-
-      double k = sqrt(max(1.,f1rf->GetChisquare()/max(1,f1rf->GetNDF())));
-      hrh->SetBinContent(i, f1rf->GetParameter(0));
-      hrh->SetBinError(i, k*f1rf->GetParError(0));
-      hre->SetBinContent(i, f1rf->GetParameter(1));
-      hre->SetBinError(i, k*f1rf->GetParError(1));
-      hr->SetBinContent(i, f1rfm->GetParameter(0));
-      hr->SetBinError(i, k*f1rfm->GetParError(0));
-    }
-  }
-
-  TProfile *prhh = p2rf_bb->ProfileX("prhh",1,1,"o"); // ref.
-  int ieta05 = p2r_h->GetYaxis()->FindBin(0.522-0.05); // def.
-  TProfile *prhh2 = p2r_h->ProfileX("prhh2",1,ieta05,"o"); // def.
-  TProfile *pree2 = p2r_e->ProfileX("pree2",1,ieta05,"o"); // def.
-  int j1 = p2rf_bb->GetYaxis()->FindBin(0.20);
-  int j2 = p2rf_bb->GetYaxis()->FindBin(0.80);
-  TProfile *pree = p2rf_bb->ProfileX("pree",j1,j2,"o"); // ref.
-  
-  TH1D *h4rf = tdrHist("h4rf","Response",0,1.3,"p_{T,gen} (GeV)",0.2,1000.);
-  if (isClosure) h4rf->SetYTitle("Corrected response");
-  if (isClosure) h4rf->GetYaxis()->SetRangeUser(0.8+1e-5,1.5-1e-5);
-  TCanvas *c4rf = tdrCanvas("c4rf",h4rf,8,11,kSquare);
-  gPad->SetLogx();
-
-  tdrDraw(prhh,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0,0.7);
-  tdrDraw(prhh2,"Pz",kOpenCircle,kRed, kSolid,-1,kNone,0,0.7);
-  tdrDraw(pree,"Pz",kFullCircle,kBlue, kSolid,-1,kNone,0,0.7);
-  tdrDraw(pree2,"Pz",kOpenCircle,kBlue, kSolid,-1,kNone,0,0.7);
-
-  tdrDraw(hr,"Pz",kNone,kBlack);
-  tdrDraw(hre,"Pz",kNone,kBlue);
-  tdrDraw(hrh,"Pz",kNone,kOrange+1);
-
-
-  double emin = 3.5;
-  double eref = 500;
-  double etaref = 0.5;
-  cout << "H-component of EH" << endl;
-  TF1 *f1rh = new TF1("f1rh","[0]+[1]*pow(x,[2])",emin,eref/cosh(etaref));
-  f1rh->SetParameters(1,-1,-0.3);
-  f1rh->SetParLimits(0,0.9,1.2);
-  f1rh->SetParLimits(2,-0.5,-0.1);
-  hrh->Fit(f1rh,"RN");
-  f1rh->SetLineColor(kOrange+1);
-  f1rh->DrawClone("SAME");
-  f1rh->SetLineStyle(kDotted);
-  f1rh->SetRange(0.2,1000.);
-  f1rh->Draw("SAME");
-
-  cout << "E-component of EH" << endl;
-  TF1 *f1re = new TF1("f1re","[0]+[1]*pow(x,[2])",emin,eref/cosh(etaref));
-  f1re->SetParameters(1,-1,-0.3);
-  f1re->SetParLimits(0,0.9,1.3);//1.2);
-  f1re->SetParLimits(2,-0.5,-0.1);
-  hre->Fit(f1re,"RN");
-  f1re->SetLineColor(kBlue);
-  f1re->DrawClone("SAME");
-  f1re->SetLineStyle(kDotted);
-  f1re->SetRange(0.2,1000.);
-  f1re->Draw("SAME");
-
-  cout << "EH-hadrons" << endl;
-  TF1 *f1r = new TF1("f1r","[0]+[1]*pow(x,[2])",emin,eref/cosh(etaref));
-  f1r->SetParameters(1,-1,-0.3);
-  f1r->SetParLimits(0,0.9,1.2);
-  f1r->SetParLimits(2,-0.5,-0.1);
-  hr->Fit(f1r,"RN");
-  f1r->SetLineColor(kBlack);
-  f1r->DrawClone("SAME");
-  f1r->SetLineStyle(kDotted);
-  f1r->SetRange(0.2,1000.);
-  f1r->Draw("SAME");
-
-  cout << "H-hadrons" << endl;
-  TF1 *f1rhh = new TF1("f1rhh","[0]+[1]*pow(x,[2])",emin,eref/cosh(etaref));
-  f1rhh->SetParameters(1,-1,-0.3);
-  f1rhh->SetParLimits(0,0.9,1.2);
-  f1rhh->SetParLimits(2,-0.5,-0.1);
-  prhh->Fit(f1rhh,"RN");
-  f1rhh->SetLineColor(kRed);
-  f1rhh->DrawClone("SAME");
-  f1rhh->SetLineStyle(kDotted);
-  f1rhh->SetRange(0.2,1000.);
-  f1rhh->Draw("SAME");
-  
-  gPad->RedrawAxis();
-  c4rf->SaveAs("pdf/drawPionGun_respHE.pdf");
-*/
 
   ///////////////////////////////////////////////////////////
   // Complete 3D analysis in eta(x), pT(y), fe(z); 30 bins //
@@ -599,6 +506,18 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   TCanvas *c5 = new TCanvas("c5","c5",6*300,5*300);
   c5->Divide(6,5,0,0);
+
+  TCanvas *c5_h = new TCanvas("c5_h","c5_h",6*300,5*300);
+  c5_h->Divide(6,5,0,0);
+
+  TCanvas *c5_eh = new TCanvas("c5_eh","c5_eh",6*300,5*300);
+  c5_eh->Divide(6,5,0,0);
+  
+  TCanvas *c5_ee = new TCanvas("c5_ee","c5_ee",6*300,5*300);
+  c5_ee->Divide(6,5,0,0);
+
+  TCanvas *c5_h3 = new TCanvas("c5_h3","c5_h3",6*300,5*300);
+  c5_h3->Divide(6,5,0,0);
 
   // Store data to .root for easier comparison between years
   TFile *fo = new TFile("drawPiongun.root","RECREATE");
@@ -611,17 +530,18 @@ void drawPiongun(string file = "", bool isClosure = false) {
   // Set limits to fit parameters c,a,m (also used for automatic plot ranges)
   // Functional form is c*(1 - a*pT^{m-1})
   // Expectations are c~1, a~0.5 (but seems a~1) and m~0.7 (or ~0.85?)
-  double minc = (isClosure ? 0.80 : 0.90);
+  //double minc = (isClosure ? 0.80 : 0.90);
+  double minc = (isClosure ? 0.80 : 0.70);
   double maxc = (isClosure ? 1.20 : 1.40);
-  double mina = (isClosure ?   -1 : 0.45);
-  double maxa = (isClosure ?   +1 : 1.20);
+  double mina = (isClosure ?   -1 : 0.2);//0.45);
+  double maxa = (isClosure ?   +1 : 1.3);//2.0);//1.4);//1.20);
   double minm = 0.0;
   double maxm = 0.90;
 
-  double refa = (isClosure ? 0 : 1) ;
+  double refa = (isClosure ? 0 : 0.75);//1) ;
+  double refae = (isClosure ? 0 : 1.25);
   
   c5f->cd(neta);
-  //TLegend *leg5f = tdrLeg(0.05,0.90,0.55,0.90);
   TLegend *leg5f = tdrLeg(0.05,0.90-0.05*1.5*6,0.55,0.90);
 
   // Load full eta,pT,f_ECAL 3D map of single-pion response
@@ -675,7 +595,6 @@ void drawPiongun(string file = "", bool isClosure = false) {
     
     c5f->cd(ieta);
     TH1D *hf = tdrHist(Form("h5f_%d",ieta),"(rawECAL+rawHCAL)/genP",
-		       //0.2+1e-4,1.2-1e-5,
 		       0.0+1e-4,1.3-1e-5,
 		       "rawEcal/(rawEcal+rawHcal)",0,1);
     if (useCMD) hf->SetYTitle("(ecal+hcal)/true");
@@ -712,10 +631,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
       TH1D *hfe = pfe->ProjectionX(Form("%s_hfe",pfe->GetName()));
       if (ptmin<20.) filterErr(hfe, 0.001);
 
-      //if (pfe->GetBinError(i50)!=0) {
       if (hfe->GetBinError(i50)!=0) {
 
-	//TFitResultPtr fp1f = pfe->Fit(f1f,"QRNS"); // S to return fit result
 	TFitResultPtr fp1f = hfe->Fit(f1f,"QRNS"); // S to return fit result
 
 	// Get the covariance matrix
@@ -759,15 +676,10 @@ void drawPiongun(string file = "", bool isClosure = false) {
 	if (pt>=5 && pt <=500 && (ipt-ipt5)%4==0) {
 	  c5f->cd(ieta);
 	    
-	  //tdrDraw(pfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
 	  tdrDraw(hfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
 	  
 	  if (ieta==1) {
-	    //leg5f->AddEntry(pfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
 	    leg5f->AddEntry(hfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
-	    //leg5f->SetY1NDC(leg5f->GetY1NDC()-0.05*1.5);
-	    //leg5f->SetY2NDC(leg5f->GetY2NDC()-0.05*1.5);
-	    //leg5f->SetY2NDC(0.90-leg5f->GetNColumns()*0.05*1.5);
 	  }
 	  
 	  if (f1f->GetNDF()>0) {
@@ -791,16 +703,13 @@ void drawPiongun(string file = "", bool isClosure = false) {
     gPad->SetLogx();
 
     TH1D *h = tdrHist(Form("h5_%d",ieta),"(rawECAL+rawHCAL)/genP",0+1e-5,1.3,
-		      //"p_{T,gen} (GeV)",0.2,1000.-1e-3); // v1
-		      //"p_{T,gen} (GeV)",0.2,5000.-1e-3); // v2
-		      "p_{T,gen} (GeV)",0.2,maxe2-1e-3); // v2
-    if (useCMD) h->SetYTitle("(ecal+hcal)/true");
-    if (useCMD) h->SetXTitle("true/cosh(eta) (GeV)");
-    if (useCMD && isClosure) h->SetYTitle("corrected (ecal+hcal)/true");
+		      "p_{T,gen} (GeV)",0.2,maxe2-1e-3);
+    if (useCMD) h->SetYTitle("(ecal+hcal) / true");
+    if (useCMD) h->SetXTitle("true / cosh(eta) (GeV)");
+    if (useCMD && isClosure) h->SetYTitle("corrected (ecal+hcal) / true");
     if (isClosure) h->GetYaxis()->SetRangeUser(0.8+1e-5,1.5-1e-5);
     h->Draw();
 
-    //TLatex *tex = new TLatex();
     tex->SetTextSize(0.045*1.5);
     tex->SetNDC();
 
@@ -825,8 +734,13 @@ void drawPiongun(string file = "", bool isClosure = false) {
     curdir->cd();
     // end store to drawPiongun.root
     
-    double ptmin = 5.; // broadly safe, expect parts of EC
-    double ptmax = 500./cosh(eta);
+    //double ptmin = (eta<1.3 ? 5. : 2.5); // broadly safe, except parts of EC
+    double ptmin = (eta<1.5 ? 5. : 2.5); // broadly safe, except parts of EC
+    double emax = (eta<1.3 ? 1000. : 2000.);
+    double ptmax = emax/cosh(eta);
+    double emaxe = 5000.;
+    double ptmaxe = emaxe/cosh(eta);
+    
     double fixm_a = 0;//0.60; // 0 for free
     double fixm_h = 0;//0.70; // 0 for free
     double fixm_e = 0;//0.70; // 0 for free
@@ -835,7 +749,6 @@ void drawPiongun(string file = "", bool isClosure = false) {
     
     // Adjust minimum pT range for E hadrons
     double ptmin_e = ptmin;
-    //if (eta<1.479) ptmin_e = 3.5; // go bit lower
     if (eta>2.043) ptmin_e = 8; // go bit higher
     
     // NB: parameter 'a' should be vs E, but works better with pT??
@@ -860,27 +773,47 @@ void drawPiongun(string file = "", bool isClosure = false) {
     f1a->SetLineStyle(kDotted);
     //f1a->DrawClone("SAME");
 
-    // H-hadrons
+    /////////////////////
+    // H-hadrons       //
+    /////////////////////
     TF1 *f1h = new TF1(Form("f1h_%d",ieta),
 		       "max([3],[0]*(1-[1]*pow(x,[2]-1)))",
 		       ptmin,ptmax);
     f1h->SetParameters(1.1,refa,0.70,0.65);
     f1h->SetParLimits(0,minc,maxc);
     f1h->SetParLimits(1,mina,maxa);
-    if (fixa) f1h->FixParameter(1,0.55);
     f1h->SetParLimits(2,minm,maxm);
-    if (fixm_h && eta<1.479) f1h->FixParameter(2,fixm_h);
-    f1h->FixParameter(3,0.65);
-    if (eta>1.392) f1h->FixParameter(3,0.75);
-    if (eta>1.740) f1h->FixParameter(3,0.65);
-    if (eta>2.172) f1h->FixParameter(3,0.60);
-    if (eta>2.500) f1h->FixParameter(3,0.50);
-    if (eta>2.853) f1h->FixParameter(3,0.40);
 
+    if (fixa) f1h->FixParameter(1,0.55);
+    if (fixm_h && eta<1.479) f1h->FixParameter(2,fixm_h);
+
+    // Fix minimum limit
+    f1h->FixParameter(3,0.65);
+    if (eta>0.609) f1h->FixParameter(3,0.67);
+    if (eta>0.783) f1h->FixParameter(3,0.70);
+    if (eta>1.131) f1h->FixParameter(3,0.72);
+    if (eta>1.218) f1h->FixParameter(3,0.75);
+    if (eta>1.305) f1h->FixParameter(3,0.67);
+    if (eta>1.392) f1h->FixParameter(3,0.70);
+    if (eta>1.479) f1h->FixParameter(3,0.65);
+    if (eta>1.653) f1h->FixParameter(3,0.62);
+    if (eta>1.930) f1h->FixParameter(3,0.60);
+    if (eta>2.043) f1h->FixParameter(3,0.58);
+    if (eta>2.172) f1h->FixParameter(3,0.57);
+    if (eta>2.322) f1h->FixParameter(3,0.55);
+    if (eta>2.500) f1h->FixParameter(3,0.50);
+    if (eta>2.650) f1h->FixParameter(3,0.37);
+    if (eta>2.853) f1h->FixParameter(3,0.33);
+
+    TH1D *hh = ph->ProjectionX(Form("hh_%d",ieta));
+    setMinErr(hh,_hhMinErr);//0.007);//0.006);
+    
     f1h->SetLineColor(kRed);
-    ph->Fit(f1h,"QRNS");
+    //ph->Fit(f1h,"QRNS");
+    hh->Fit(f1h,"QRNS");
+    hh->Fit(f1h,"QRNS"); // repeat to improve error
     TF1 *f1h_0 = (TF1*)f1h->DrawClone("SAME");
-    f1h->SetRange(0.2,1000.);
+    f1h->SetRange(0.2,5000.);//1000.);
     f1h->SetLineStyle(kDotted);
     f1h->DrawClone("SAME");
 
@@ -921,46 +854,65 @@ void drawPiongun(string file = "", bool isClosure = false) {
     f1ea->SetLineStyle(kDotted);
     //f1ea->DrawClone("SAME");
 
+    /////////////////////
+    // E of EH hadrons //
+    /////////////////////
     TF1 *f1ee = new TF1(Form("f1ee_%d",ieta),
 			"max([3],[0]*(1-[1]*pow(x,[2]-1)))",
-			ptmin,ptmax);
+			ptmin,ptmaxe);
     f1ee->SetParameters(1.15,refa,0.70,0.35);
     f1ee->SetParLimits(0,minc,maxc);
     f1ee->SetParLimits(1,mina,maxa);
-    if (fixa) f1ee->FixParameter(1,1.3);
     f1ee->SetParLimits(2,minm,maxm);
+
+    if (fixa) f1ee->FixParameter(1,1.3);
     if (fixm_toe) f1ee->FixParameter(2,f1ea->GetParameter(2));
+
     f1ee->FixParameter(3,0.35);
-    if (eta>1.479) f1ee->FixParameter(3,0.25);
+    if (eta>1.392) f1ee->FixParameter(3,0.25);
+    if (eta>1.479) f1ee->FixParameter(3,0.15);
+    if (eta>1.930) f1ee->FixParameter(3,0.17);
+    if (eta>2.043) f1ee->FixParameter(3,0.20);
+    if (eta>2.322) f1ee->FixParameter(3,0.25);
 
     f1ee->SetLineColor(kMagenta+2);
+    setMinErr(hee,_eeMinErr);
     hee->Fit(f1ee,"QRNS");
     TF1 *f1ee_0 = (TF1*)f1ee->DrawClone("SAME");
-    f1ee->SetRange(0.2,1000.);
+    f1ee->SetRange(0.2,5000.);//1000.);
     f1ee->SetLineStyle(kDotted);
     f1ee->DrawClone("SAME");
 
+    //////////////////////
+    // H of EH hadrons  //
+    //////////////////////
     TF1 *f1eh = new TF1(Form("f1eh_%d",ieta),
 			"max([3],[0]*(1-[1]*pow(x,[2]-1)))",
-			ptmin,ptmax);
-    f1eh->SetParameters(1.0,refa,0.70,0.50);
+			ptmin,ptmaxe);
+    //f1eh->SetParameters(1.0,refa,0.70,0.50);
+    f1eh->SetParameters(f1h->GetParameter(0)-0.06, f1h->GetParameter(1),
+			0.7, 0.50);
     f1eh->SetParLimits(0,minc,maxc);
     f1eh->SetParLimits(1,mina,maxa);
-    if (fixa) f1eh->FixParameter(1,0.85);
     f1eh->SetParLimits(2,minm,maxm);
-    if (fixm_toe) f1eh->FixParameter(2,f1ea->GetParameter(2));
-    f1eh->FixParameter(3,0.50);
-    if (eta>1.479) f1eh->FixParameter(3,0.70);
-    if (eta>1.566) f1eh->FixParameter(3,0.60);
-    if (eta>2.322) f1eh->FixParameter(3,0.65);
-    if (eta>2.500) f1eh->FixParameter(3,0.70);
-    if (eta>2.650) f1eh->FixParameter(3,0.65);
-    if (eta>2.853) f1eh->FixParameter(3,0.50);
 
+    if (fixa) f1eh->FixParameter(1,0.85);
+    if (fixm_toe) f1eh->FixParameter(2,f1ea->GetParameter(2));
+
+    // Fix minimum limit
+    f1eh->FixParameter(3,0.40);
+    if (eta>1.479) f1eh->FixParameter(3,0.60);
+    if (eta>1.566) f1eh->FixParameter(3,0.60);
+    if (eta>2.172) f1eh->FixParameter(3,0.65);
+    if (eta>2.650) f1eh->FixParameter(3,0.55);
+    if (eta>2.853) f1eh->FixParameter(3,0.45);
+    
     f1eh->SetLineColor(kOrange+2);
+    setMinErr(heh,_ehMinErr);//0.006);
+    heh->Fit(f1eh,"QRNS");
     heh->Fit(f1eh,"QRNS");
     TF1 *f1eh_0 = (TF1*)f1eh->DrawClone("SAME");
-    f1eh->SetRange(0.2,1000.);
+    f1eh->SetRange(0.2,5000.);
     f1eh->SetLineStyle(kDotted);
     f1eh->DrawClone("SAME");
 
@@ -977,6 +929,165 @@ void drawPiongun(string file = "", bool isClosure = false) {
     
     gPad->RedrawAxis();
 
+    
+    // Separate plot for H-hadrons for better legibility
+    // Add also Data/fit ratio
+    c5_h->cd(ieta);
+    gPad->SetLogx();
+    
+    TH1D *h_5h = tdrHist(Form("h_5h_%d",ieta),
+			 "(ecal+hcal) / genP",0.2+1e-5,1.5,
+			 "genP / cosh(genEta) (GeV)",0.2,maxe2-1e-3);
+    if (isClosure) h_5h->SetYTitle("corrected (ecal+hcal) / genP");
+    if (isClosure) h_5h->GetYaxis()->SetRangeUser(0.8+1e-5,1.5-1e-5);
+    h_5h->GetXaxis()->SetMoreLogLabels(kFALSE);
+    h_5h->Draw();
+
+    l->SetLineStyle(kSolid);
+    l->SetLineColor(kGray);
+    l->DrawLine(ptmin,0.2,ptmin,1.5);
+    l->DrawLine(ptmax,0.2,ptmax,1.5);
+		
+    l->SetLineStyle(kDashed);
+    l->SetLineColor(kGray+1);
+    l->DrawLine(0.2,1,maxe2,1);
+
+    tex->SetTextSize(0.045*1.5);
+    tex->SetNDC();
+    tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+
+    TH1D *hh_fit = ph->ProjectionX(Form("hh_fit_%d",ieta),"o");
+    hh_fit->Divide(f1h);
+    /*
+    for (int i = 1; i != ph->GetNbinsX()+1; ++i) {
+      if (hh_fit->GetBinContent(i)!=0) {
+	hh_fit->SetBinContent(i, ph->GetBinContent(i)
+			      / f1h->Eval(ph->GetBinCenter(i)));
+	hh_fit->SetBinError(i, ph->GetBinError(i)
+			    / f1h->Eval(ph->GetBinCenter(i)));
+      }
+    }
+    */
+    tdrDraw(hh_fit,"Pz",kOpenCircle,kRed-9, kSolid,-1,kNone,0, 0.7);
+    //tdrDraw(ph,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0, 0.7);
+    tdrDraw(hh,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0, 0.7);
+    f1h_0->Draw("SAME");
+    f1h->Draw("SAME");
+
+
+    // Separate plot for H of EH-hadrons for better legibility
+    // Add also Data/fit ratio
+    c5_eh->cd(ieta);
+    gPad->SetLogx();
+    
+    TH1D *h_5eh = tdrHist(Form("h_5eh_%d",ieta),
+			 "hcal / genP",0.2+1e-5,1.5,
+			 "genP / cosh(genEta) (GeV)",0.2,maxe2-1e-3);
+    if (isClosure) h_5eh->SetYTitle("corrected hcal / genP");
+    if (isClosure) h_5eh->GetYaxis()->SetRangeUser(0.8+1e-5,1.5-1e-5);
+    h_5eh->GetXaxis()->SetMoreLogLabels(kFALSE);
+    h_5eh->Draw();
+
+    l->SetLineStyle(kSolid);
+    l->SetLineColor(kGray);
+    l->DrawLine(ptmin,0.2,ptmin,1.5);
+    l->DrawLine(ptmaxe,0.2,ptmaxe,1.5);
+		
+    l->SetLineStyle(kDashed);
+    l->SetLineColor(kGray+1);
+    l->DrawLine(0.2,1,maxe2,1);
+
+    tex->SetTextSize(0.045*1.5);
+    tex->SetNDC();
+    tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+
+    TH1D *heh_fit = (TH1D*)heh->Clone(Form("heh_fit_%d",ieta));
+    heh_fit->Divide(f1eh);
+
+    tdrDraw(heh_fit,"Pz",kOpenCircle,kOrange-9, kSolid,-1,kNone,0, 0.7);
+    tdrDraw(heh,"Pz",kFullCircle,kOrange+2, kSolid,-1,kNone,0, 0.7);
+    f1eh_0->Draw("SAME");
+    f1eh->Draw("SAME");
+
+    
+    // Separate plot for E of EH-hadrons for better legibility
+    // Add also Data/fit ratio
+    c5_ee->cd(ieta);
+    gPad->SetLogx();
+    
+    TH1D *h_5ee = tdrHist(Form("h_5ee_%d",ieta),
+			 "ecal / genP",0.0+1e-5,1.3,
+			 "genP / cosh(genEta) (GeV)",0.2,maxe2-1e-3);
+    if (isClosure) h_5ee->SetYTitle("corrected ecal / genP");
+    if (isClosure) h_5ee->GetYaxis()->SetRangeUser(0.8+1e-5,1.5-1e-5);
+    h_5ee->GetXaxis()->SetMoreLogLabels(kFALSE);
+    h_5ee->Draw();
+
+    l->SetLineStyle(kSolid);
+    l->SetLineColor(kGray);
+    l->DrawLine(ptmin,0.2,ptmin,1.5);
+    l->DrawLine(ptmaxe,0.2,ptmaxe,1.5);
+		
+    l->SetLineStyle(kDashed);
+    l->SetLineColor(kGray+1);
+    l->DrawLine(0.2,1,maxe2,1);
+
+    tex->SetTextSize(0.045*1.5);
+    tex->SetNDC();
+    tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+
+    TH1D *hee_fit = (TH1D*)hee->Clone(Form("hee_fit_%d",ieta));
+    hee_fit->Divide(f1ee);
+
+    tdrDraw(hee_fit,"Pz",kOpenCircle,kMagenta-9, kSolid,-1,kNone,0, 0.7);
+    tdrDraw(hee,"Pz",kFullCircle,kMagenta+2, kSolid,-1,kNone,0, 0.7);
+    f1ee_0->Draw("SAME");
+    f1ee->Draw("SAME");
+
+
+    // Once more with just H, E-of-HE and H-of-HE
+       // Separate plot for E of EH-hadrons for better legibility
+    // Add also Data/fit ratio
+    c5_h3->cd(ieta);
+    gPad->SetLogx();
+    
+    TH1D *h_5_h3 = tdrHist(Form("h_5_3h_%d",ieta),
+			 "(ecal+hcal) / genP",0.0+1e-5,1.3,
+			 "genP / cosh(genEta) (GeV)",0.2,maxe2-1e-3);
+    if (isClosure) h_5_h3->SetYTitle("corrected (ecal+hcal) / genP");
+    if (isClosure) h_5_h3->GetYaxis()->SetRangeUser(0.8+1e-5,1.5-1e-5);
+    h_5_h3->GetXaxis()->SetMoreLogLabels(kFALSE);
+    h_5_h3->Draw();
+
+    l->SetLineStyle(kSolid);
+    l->SetLineColor(kGray);
+    l->DrawLine(ptmin,0.,ptmin,1.3);
+    l->DrawLine(ptmaxe,0.,ptmaxe,1.3);
+		
+    l->SetLineStyle(kDashed);
+    l->SetLineColor(kGray+1);
+    l->DrawLine(0.2,1,maxe2,1);
+
+    l->SetLineStyle(kDotted);
+    l->DrawLine(ptmax,0.,ptmax,1.3);
+
+    tex->SetTextSize(0.045*1.5);
+    tex->SetNDC();
+    tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+
+    //tdrDraw(ph,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0, 0.7);
+    tdrDraw(hh,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0, 0.7);
+    tdrDraw(heh,"Pz",kOpenDiamond,kOrange+2, kSolid,-1,kNone,0, 0.7);
+    tdrDraw(hee,"Pz",kOpenDiamond,kMagenta+2, kSolid,-1,kNone,0, 0.7);
+
+    f1h_0->Draw("SAME");
+    f1h->Draw("SAME");
+    f1eh_0->Draw("SAME");
+    f1eh->Draw("SAME");
+    f1ee_0->Draw("SAME");
+    f1ee->Draw("SAME");
+
+    
     // Draw legend in the last empty pad
     TLegend *legi(0);
     if (ieta==1) {
@@ -1061,7 +1172,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
 	vm[ieta-1]["eh"][i] = f1eh->GetParameter(i);
 	vm[ieta-1]["ee"][i] = f1ee->GetParameter(i);
       }
-      else {
+      else { // i==3
 	double h_chi2 = f1h->GetChisquare();
 	int h_ndf = max(1,f1h->GetNDF());
 	double k = 1.;//1./3.;
@@ -1084,7 +1195,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
 	int ea_ndf = max(1,f1ea->GetNDF());
 	mg["ea"][i]->SetPoint(ieta-1, eta, k*ea_chi2/ea_ndf);
 	mg["ea"][i]->SetPointError(ieta-1, deta, k*1./sqrt(ea_ndf));
-	double eh_chi2 = f1ee->GetChisquare();
+	double eh_chi2 = f1eh->GetChisquare();
 	int eh_ndf = max(1,f1eh->GetNDF());
 	mg["eh"][i]->SetPoint(ieta-1, eta, k*eh_chi2/ee_ndf);
 	mg["eh"][i]->SetPointError(ieta-1, deta, k*1./sqrt(eh_ndf));
@@ -1130,9 +1241,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
       double eps = 1e-4;
       TH1D *h5i = tdrHist(Form("h5i_%d",ieta),"(rawEcal+rawHcal)/genP",
 			  0.+eps,1.3-eps,
-			  //"p_{T,gen} (GeV)",0.2,1000-eps); // v1
-			  //"p_{T,gen} (GeV)",0.2,5000-eps); // v2
-			  "p_{T,gen} (GeV)",0.2,maxe2-eps); // v2
+			  "p_{T,gen} (GeV)",0.2,maxe2-eps);
       if (useCMD) h5i->SetYTitle("(ecal+hcal)/true");
       if (useCMD) h5i->SetXTitle("true/cosh(eta) (GeV)");
       TCanvas *c5i = tdrCanvas(Form("c5_%d",ieta),h5i,8,11,kSquare);
@@ -1167,12 +1276,16 @@ void drawPiongun(string file = "", bool isClosure = false) {
   } // for ieta
 
   c5->SaveAs("pdf/drawPionGun_respHE_3D.pdf");
+  c5_h->SaveAs("pdf/drawPionGun_respHE_3D_H.pdf");
+  c5_eh->SaveAs("pdf/drawPionGun_respHE_3D_EH.pdf");
+  c5_ee->SaveAs("pdf/drawPionGun_respHE_3D_EE.pdf");
+  c5_h3->SaveAs("pdf/drawPionGun_respHE_3D_3.pdf");
   fo->Close();
   
   c5f->SaveAs("pdf/drawPionGun_respFE_3D.pdf");
 
-  
-  // Draw fit results vs |eta|
+  /*
+  // Draw fit results vs |eta| (too busy with all parameters)
   TH1D *h6 = tdrHist("h6","Parameter",0.,2.0,"|#eta_{gen}|",0,3.139);
   TCanvas *c6 = tdrCanvas("c6",h6,8,11,kSquare);
 
@@ -1198,7 +1311,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
 
   gPad->RedrawAxis();
   c6->SaveAs("pdf/drawPionGun_parsVsEta.pdf");
-
+  */
 
   // c range is 0.9,1.3, so 0.4 -> 0.6
   TH1D *h6c = tdrHist("h6c","Parameter 'c'",
@@ -1210,24 +1323,27 @@ void drawPiongun(string file = "", bool isClosure = false) {
   tex->DrawLatex(0.19,0.70,"c #approx R_{#pi^{+}}(50 GeV)/EM");
   
   tdrDraw(mg["h"][0],"Pz",kFullSquare,kRed,kSolid,-1,kNone,0, 0.7);
-  tdrDraw(mg["e"][0],"Pz",kFullSquare,kBlue,kSolid,-1,kNone,0, 0.5);
-  tdrDraw(mg["a"][0],"Pz",kFullSquare,kGray+2,kSolid,-1,kNone,0, 0.4);
-  tdrDraw(mg["ea"][0],"Pz",kOpenSquare,kBlue+1,kSolid,-1,kNone,0, 0.5);
+  //tdrDraw(mg["e"][0],"Pz",kFullSquare,kBlue,kSolid,-1,kNone,0, 0.5);
+  //tdrDraw(mg["a"][0],"Pz",kFullSquare,kGray+2,kSolid,-1,kNone,0, 0.4);
+  //tdrDraw(mg["ea"][0],"Pz",kOpenSquare,kBlue+1,kSolid,-1,kNone,0, 0.5);
   tdrDraw(mg["ee"][0],"Pz",kOpenSquare,kMagenta+2,kSolid,-1,kNone,0, 0.5);
   tdrDraw(mg["eh"][0],"Pz",kOpenSquare,kOrange+1,kSolid,-1,kNone,0, 0.5);
 
-  TLegend *leg6c = tdrLeg(0.55,0.90-0.045*6,0.80,0.90);
-  leg6c->AddEntry(mg["a"][0],"All hadrons","PLE");
+  //TLegend *leg6c = tdrLeg(0.55,0.90-0.045*6,0.80,0.90);
+  TLegend *leg6c = tdrLeg(0.55,0.90-0.045*3,0.80,0.90);
+  //leg6c->AddEntry(mg["a"][0],"All hadrons","PLE");
   leg6c->AddEntry(mg["h"][0],"H (fE<0.01)","PLE");
-  leg6c->AddEntry(mg["e"][0],"E (0.20<fE<0.80)","PLE");
-  leg6c->AddEntry(mg["ea"][0],"E (fE#rightarrow0.5)","PLE");
+  //leg6c->AddEntry(mg["e"][0],"E (0.20<fE<0.80)","PLE");
+  //leg6c->AddEntry(mg["ea"][0],"E (fE#rightarrow0.5)","PLE");
   leg6c->AddEntry(mg["eh"][0],"H of E (fE#rightarrow0)","PLE");
   leg6c->AddEntry(mg["ee"][0],"E of E (fE#rightarrow1)","PLE");
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
+  l->DrawLine(1.305,0.9,1.305,1.5);
   l->DrawLine(1.479,0.9,1.479,1.5);
   l->DrawLine(2.500,0.9,2.500,1.3);
+  
   l->SetLineStyle(kDashed);
   l->DrawLine(0.,1.0,3.139,1.0);
   l->SetLineColor(kRed);
@@ -1246,24 +1362,26 @@ void drawPiongun(string file = "", bool isClosure = false) {
   tex->DrawLatex(0.19,0.20,"m = 1- #frac{ln(1/(1-F_{#pi^{0}}))}{ln(n)}");
   
   tdrDraw(mg["h"][2],"Pz",kFullDiamond,kRed+2,kSolid,-1,kNone,0, 1.0);
-  tdrDraw(mg["e"][2],"Pz",kFullDiamond,kBlue+2,kSolid,-1,kNone,0, 0.8);
-  tdrDraw(mg["a"][2],"Pz",kFullDiamond,kGray+3,kSolid,-1,kNone,0, 0.7);
-  tdrDraw(mg["ea"][2],"Pz",kOpenDiamond,kBlue+1,kSolid,-1,kNone,0, 0.8);
+  //tdrDraw(mg["e"][2],"Pz",kFullDiamond,kBlue+2,kSolid,-1,kNone,0, 0.8);
+  //tdrDraw(mg["a"][2],"Pz",kFullDiamond,kGray+3,kSolid,-1,kNone,0, 0.7);
+  //tdrDraw(mg["ea"][2],"Pz",kOpenDiamond,kBlue+1,kSolid,-1,kNone,0, 0.8);
   tdrDraw(mg["ee"][2],"Pz",kOpenDiamond,kMagenta+2,kSolid,-1,kNone,0, 0.8);
   tdrDraw(mg["eh"][2],"Pz",kOpenDiamond,kOrange+2,kSolid,-1,kNone,0, 0.8);
 
-  TLegend *leg6m = tdrLeg(0.55,0.90-0.045*6,0.80,0.90);
-  leg6m->AddEntry(mg["a"][2],"All hadrons","PLE");
+  //TLegend *leg6m = tdrLeg(0.55,0.90-0.045*6,0.80,0.90);
+  TLegend *leg6m = tdrLeg(0.55,0.90-0.045*3,0.80,0.90);
+  //leg6m->AddEntry(mg["a"][2],"All hadrons","PLE");
   leg6m->AddEntry(mg["h"][2],"H (fE<0.01)","PLE");
-  leg6m->AddEntry(mg["e"][2],"E (0.20<fE<0.80)","PLE");
-  leg6m->AddEntry(mg["ea"][2],"E (fE#rightarrow0.5)","PLE");
+  //leg6m->AddEntry(mg["e"][2],"E (0.20<fE<0.80)","PLE");
+  //leg6m->AddEntry(mg["ea"][2],"E (fE#rightarrow0.5)","PLE");
   leg6m->AddEntry(mg["eh"][2],"H of E (fE#rightarrow0)","PLE");
   leg6m->AddEntry(mg["ee"][2],"E of E (fE#rightarrow1)","PLE");
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(1.479,0.0,1.479,1.35);
-  l->DrawLine(2.500,0.0,2.500,0.9);
+  l->DrawLine(1.305,0.4,1.305,1.55);
+  l->DrawLine(1.479,0.4,1.479,1.55);
+  l->DrawLine(2.500,0.0,2.500,1.2);
   // Core parameters for nuclear interactions: Fpi0 and n
   double Fpi0 = 1./3.+0.05; // Fraction of pi0 in secondaries ~1./3 + rho0
   double n = 5; // Typical number of nuclear secondaries 5-6
@@ -1286,24 +1404,26 @@ void drawPiongun(string file = "", bool isClosure = false) {
   tex->DrawLatex(0.19,0.70,"a = (1-h/e)#timesE_{0}^{1-m}");
   
   tdrDraw(mg["h"][1],"Pz",kFullCircle,kRed+1,kSolid,-1,kNone,0, 0.7);
-  tdrDraw(mg["e"][1],"Pz",kFullCircle,kBlue+1,kSolid,-1,kNone,0, 0.5);
-  tdrDraw(mg["a"][1],"Pz",kFullCircle,kGray+2,kSolid,-1,kNone,0, 0.4);
-  tdrDraw(mg["ea"][1],"Pz",kOpenCircle,kBlue+1,kSolid,-1,kNone,0, 0.5);
+  //tdrDraw(mg["e"][1],"Pz",kFullCircle,kBlue+1,kSolid,-1,kNone,0, 0.5);
+  //tdrDraw(mg["a"][1],"Pz",kFullCircle,kGray+2,kSolid,-1,kNone,0, 0.4);
+  //tdrDraw(mg["ea"][1],"Pz",kOpenCircle,kBlue+1,kSolid,-1,kNone,0, 0.5);
   tdrDraw(mg["ee"][1],"Pz",kOpenCircle,kMagenta+1,kSolid,-1,kNone,0, 0.5);
   tdrDraw(mg["eh"][1],"Pz",kOpenCircle,kOrange+1,kSolid,-1,kNone,0, 0.5);
 
-  TLegend *leg6a = tdrLeg(0.55,0.90-0.045*6,0.80,0.90);
-  leg6a->AddEntry(mg["a"][1],"All hadrons","PLE");
+  //TLegend *leg6a = tdrLeg(0.55,0.90-0.045*6,0.80,0.90);
+  TLegend *leg6a = tdrLeg(0.55,0.90-0.045*3,0.80,0.90);
+  //leg6a->AddEntry(mg["a"][1],"All hadrons","PLE");
   leg6a->AddEntry(mg["h"][1],"H (fE<0.01)","PLE");
-  leg6a->AddEntry(mg["e"][1],"E (0.20<fE<0.80)","PLE");
-  leg6a->AddEntry(mg["ea"][1],"E (fE#rightarrow0.5)","PLE");
+  //leg6a->AddEntry(mg["e"][1],"E (0.20<fE<0.80)","PLE");
+  //leg6a->AddEntry(mg["ea"][1],"E (fE#rightarrow0.5)","PLE");
   leg6a->AddEntry(mg["eh"][1],"H of E (fE#rightarrow0)","PLE");
   leg6a->AddEntry(mg["ee"][1],"E of E (fE#rightarrow1)","PLE");
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(1.479,0.3,1.479,2.1);
-  l->DrawLine(2.500,0.3,2.500,1.5);
+  l->DrawLine(1.305,0.45,1.305,1.3);
+  l->DrawLine(1.479,0.45,1.479,1.75);
+  l->DrawLine(2.500,0.45,2.500,1.5);
 
   // Calorimeter parameters for h/e and E0
   // https://indico.cern.ch/event/31463/contributions/726204/attachments/603326/830281/08-AndrisSkuja-HCALstatus_LeHCReport.pdf?#page=5
@@ -1328,26 +1448,34 @@ void drawPiongun(string file = "", bool isClosure = false) {
   TH1D *h7 = tdrHist("h7","#chi^{2} / NDF",0,15,"|#eta_{gen}|",0,3.139);
   TCanvas *c7 = tdrCanvas("c7",h7,8,11,kSquare);
 
+  l->SetLineStyle(kDashed);
+  l->SetLineColor(kGray+1);
+  l->DrawLine(0,1,3.139,1);
+  
   tdrDraw(mg["h"][3],"Pz",kFullStar,kRed,kSolid,-1,kNone,0, 0.7);
-  tdrDraw(mg["e"][3],"Pz",kFullStar,kBlue,kSolid,-1,kNone,0, 0.5);
-  tdrDraw(mg["a"][3],"Pz",kFullStar,kGray+2,kSolid,-1,kNone,0, 0.4);
-  tdrDraw(mg["ea"][3],"Pz",kOpenStar,kBlue+2,kSolid,-1,kNone,0, 1.0);
+  //tdrDraw(mg["e"][3],"Pz",kFullStar,kBlue,kSolid,-1,kNone,0, 0.5);
+  //tdrDraw(mg["a"][3],"Pz",kFullStar,kGray+2,kSolid,-1,kNone,0, 0.4);
+  //tdrDraw(mg["ea"][3],"Pz",kOpenStar,kBlue+2,kSolid,-1,kNone,0, 1.0);
   tdrDraw(mg["ee"][3],"Pz",kOpenStar,kMagenta+2,kSolid,-1,kNone,0, 1.0);
   tdrDraw(mg["eh"][3],"Pz",kOpenStar,kOrange+1,kSolid,-1,kNone,0, 0.5);
 
-  TLegend *leg7 = tdrLeg(0.35,0.90-0.045*6,0.60,0.90);
-  leg7->AddEntry(mg["a"][3],"All hadrons","PLE");
-  leg7->AddEntry(mg["h"][3],"H (fE<0.01)","PLE");
-  leg7->AddEntry(mg["e"][3],"E (0.20<fE<0.80)","PLE");
-  leg7->AddEntry(mg["ea"][3],"E (fE#rightarrow0.5)","PLE");
-  leg7->AddEntry(mg["eh"][3],"H of E (fE#rightarrow0)","PLE");
-  leg7->AddEntry(mg["ee"][3],"E of E (fE#rightarrow1)","PLE");
+  //TLegend *leg7 = tdrLeg(0.35,0.90-0.045*6,0.60,0.90);
+  TLegend *leg7 = tdrLeg(0.32,0.90-0.045*3,0.57,0.90);
+  //leg7->AddEntry(mg["a"][3],"All hadrons","PLE");
+  leg7->AddEntry(mg["h"][3],Form("H (fE<0.01)"
+				 "     [minErr=%1.3f]",_hhMinErr),"PLE");
+  //leg7->AddEntry(mg["e"][3],"E (0.20<fE<0.80)","PLE");
+  //leg7->AddEntry(mg["ea"][3],"E (fE#rightarrow0.5)","PLE");
+  leg7->AddEntry(mg["eh"][3],Form("H of E (fE#rightarrow0)"
+				  " [minErr=%1.3f]",_ehMinErr),"PLE");
+  leg7->AddEntry(mg["ee"][3],Form("E of E (fE#rightarrow1)"
+				  " [minErr=%1.3f]",_eeMinErr),"PLE");
   
   gPad->RedrawAxis();
   c7->SaveAs("pdf/drawPionGun_chi2VsEta.pdf");
 
 
-  // Responvs vs |eta| at a few given pT for stability monitoring
+  // Response vs |eta| at a few given pT for stability monitoring
   for (int ix = 0; ix != nx; ++ix) {
     TH1D *h8 = tdrHist(Form("h8_%d",ix),"Response",0,2,"|#eta_{gen}|",0,3.139);
     if (isClosure) h8->SetYTitle("Corrected response");
@@ -1355,17 +1483,18 @@ void drawPiongun(string file = "", bool isClosure = false) {
     TCanvas *c8 = tdrCanvas(Form("c8_%d",ix),h8,8,11,kSquare);
 
     tdrDraw(mg["h_eta"][ix],"Pz",kFullCircle,kRed,kSolid,-1,kNone,0, 0.7);
-    tdrDraw(mg["e_eta"][ix],"Pz",kFullCircle,kBlue,kSolid,-1,kNone,0, 0.5);
-    tdrDraw(mg["a_eta"][ix],"Pz",kFullCircle,kGray+2,kSolid,-1,kNone,0, 0.4);
-    tdrDraw(mg["ea_eta"][ix],"Pz",kOpenCircle,kBlue+1,kSolid,-1,kNone,0,0.7);
+    //tdrDraw(mg["e_eta"][ix],"Pz",kFullCircle,kBlue,kSolid,-1,kNone,0, 0.5);
+    //tdrDraw(mg["a_eta"][ix],"Pz",kFullCircle,kGray+2,kSolid,-1,kNone,0, 0.4);
+    //tdrDraw(mg["ea_eta"][ix],"Pz",kOpenCircle,kBlue+1,kSolid,-1,kNone,0,0.7);
     tdrDraw(mg["ee_eta"][ix],"Pz",kOpenCircle,kMagenta+2,kSolid,-1,kNone,0,0.7);
     tdrDraw(mg["eh_eta"][ix],"Pz",kOpenCircle,kOrange+1,kSolid,-1,kNone,0,0.6);
     
-    TLegend *leg8 = tdrLeg(0.35,0.90-0.045*6,0.60,0.90);
-    leg8->AddEntry(mg["a_eta"][ix],"All hadrons","PLE");
+    //TLegend *leg8 = tdrLeg(0.35,0.90-0.045*6,0.60,0.90);
+    TLegend *leg8 = tdrLeg(0.35,0.90-0.045*3,0.60,0.90);
+    //leg8->AddEntry(mg["a_eta"][ix],"All hadrons","PLE");
     leg8->AddEntry(mg["h_eta"][ix],"H (fE<0.01)","PLE");
-    leg8->AddEntry(mg["e_eta"][ix],"E (0.20<fE<0.80)","PLE");
-    leg8->AddEntry(mg["ea_eta"][ix],"E (fE#rightarrow0.5)","PLE");
+    //leg8->AddEntry(mg["e_eta"][ix],"E (0.20<fE<0.80)","PLE");
+    //leg8->AddEntry(mg["ea_eta"][ix],"E (fE#rightarrow0.5)","PLE");
     leg8->AddEntry(mg["eh_eta"][ix],"H of E (fE#rightarrow0)","PLE");
     leg8->AddEntry(mg["ee_eta"][ix],"E of E (fE#rightarrow1)","PLE");
     

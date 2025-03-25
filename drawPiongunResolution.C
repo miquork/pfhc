@@ -18,7 +18,10 @@
 
 //void drawPiongunResolution(string file = "", string file2 = "") {
 //void drawPiongunResolution(string file = "piongun_Winter25_v3.root", string file2 = "piongun_Winter24_v9v10.root") {
-void drawPiongunResolution(string file = "piongun_Winter25_v3.root", string file2 = "piongun_Winter25_PFHC_closure.root") {
+void drawPiongunResolution(string file = "piongun_Winter25_v3.root",
+			   string file2 = "piongun_Winter25_PFHC_closure.root",
+			   string name1 = "",
+			   string name2 = " (PFHC)") {
   
   TDirectory *curdir = gDirectory;
   setTDRStyle();
@@ -438,6 +441,7 @@ void drawPiongunResolution(string file = "piongun_Winter25_v3.root", string file
 
       TLegend *leg = tdrLeg(0.05,0.95-2*6*0.045,0.80,0.95);
       leg->SetTextSize(1.5*0.045);
+      /*
       leg->AddEntry(ha,"All hadrons","PLE");
       leg->AddEntry(hh,"H hadrons","PLE");
       leg->AddEntry(he,"EH hadrons","PLE");
@@ -445,6 +449,14 @@ void drawPiongunResolution(string file = "piongun_Winter25_v3.root", string file
       leg->AddEntry(hab,"All (PFHC)","F");
       leg->AddEntry(hhb,"H (PFHC)","F");
       leg->AddEntry(heb,"EH (PFHC)","F");
+      */
+      leg->AddEntry(ha,Form("All hadrons%s",name1.c_str()),"PLE");
+      leg->AddEntry(hh,Form("H hadrons%s",name1.c_str()),"PLE");
+      leg->AddEntry(he,Form("EH hadrons%s",name1.c_str()),"PLE");
+      leg->AddEntry(hab,Form("All hadrons%s",name2.c_str()),"PLE");
+      leg->AddEntry(hhb,Form("H hadrons%s",name2.c_str()),"PLE");
+      leg->AddEntry(heb,Form("EH hadrons%s",name2.c_str()),"PLE");
+      
       /*(
       leg->AddEntry(hab,"All (Winter24)","F");
       leg->AddEntry(hhb,"H (Winter24)","F");
