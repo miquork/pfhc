@@ -47,8 +47,9 @@ PFEnergyCalibration::PFEnergyCalibration() {
 // Text file containing the H and EH response arrays
 // Eventually something to go into database, but can select suitable one here
 //#include "piongun_Winter25.txt"
-#include "piongun_Winter25_v3.txt"
+//#include "piongun_Winter25_v3.txt"
 //#include "piongun_Winter24_v9v10.txt"
+#include "piongun_Winter25v2NoPu.txt"
 void PFEnergyCalibration::energyEmHad(double t, double& e, double& h, double eta, double phi) const {
 
   // Save input energies in const form
