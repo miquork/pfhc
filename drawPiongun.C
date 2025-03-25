@@ -614,7 +614,13 @@ void drawPiongun(string file = "", bool isClosure = false) {
     TH1D *hea = p2->ProjectionX(Form("hea_%d",ieta),i1,i2,"o");
     hea->Reset();
     f1f->SetParameters(0.90,0.90); // high pT starting guess
-
+    if (isClosure) {
+      f1f->SetParameters(1,1); // closure expectation
+      f1f->SetParLimits(0,0.9,1.1);
+      f1f->SetParLimits(1,0.9,1.1);
+    }
+    
+    
     // Reverse loop so lower pT uses better previous fit values as starter
     for (int ipt = p2->GetNbinsX(); ipt !=0; --ipt) {
 

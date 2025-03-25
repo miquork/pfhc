@@ -18,9 +18,9 @@
 
 //void drawPiongunResolution(string file = "", string file2 = "") {
 //void drawPiongunResolution(string file = "piongun_Winter25_v3.root", string file2 = "piongun_Winter24_v9v10.root") {
-void drawPiongunResolution(string file = "piongun_Winter25_v3.root",
+void drawPiongunResolution(string file = "",//piongun_Winter25_v3.root",
 			   string file2 = "piongun_Winter25_PFHC_closure.root",
-			   string name1 = "",
+			   string name1 = " (PFPL)",//"",
 			   string name2 = " (PFHC)") {
   
   TDirectory *curdir = gDirectory;
@@ -132,7 +132,8 @@ void drawPiongunResolution(string file = "piongun_Winter25_v3.root",
   
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -158,7 +159,8 @@ void drawPiongunResolution(string file = "piongun_Winter25_v3.root",
   tdrDraw(h2h,"COL");
 
   l->SetLineStyle(kSolid);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -186,7 +188,8 @@ void drawPiongunResolution(string file = "piongun_Winter25_v3.root",
   tdrDraw(h2a,"COLZ");
 
   l->SetLineStyle(kSolid);
-  l->DrawLine(3.5,0,3.5,1.479);
+  //l->DrawLine(3.5,0,3.5,1.479);
+  l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
   l->DrawLine(0.7,1.479,300,1.479);
   l->DrawLine(0.7,2.500,300,2.500);
@@ -453,9 +456,9 @@ void drawPiongunResolution(string file = "piongun_Winter25_v3.root",
       leg->AddEntry(ha,Form("All hadrons%s",name1.c_str()),"PLE");
       leg->AddEntry(hh,Form("H hadrons%s",name1.c_str()),"PLE");
       leg->AddEntry(he,Form("EH hadrons%s",name1.c_str()),"PLE");
-      leg->AddEntry(hab,Form("All hadrons%s",name2.c_str()),"PLE");
-      leg->AddEntry(hhb,Form("H hadrons%s",name2.c_str()),"PLE");
-      leg->AddEntry(heb,Form("EH hadrons%s",name2.c_str()),"PLE");
+      leg->AddEntry(hab,Form("All hadrons%s",name2.c_str()),"F");
+      leg->AddEntry(hhb,Form("H hadrons%s",name2.c_str()),"F");
+      leg->AddEntry(heb,Form("EH hadrons%s",name2.c_str()),"F");
       
       /*(
       leg->AddEntry(hab,"All (Winter24)","F");
