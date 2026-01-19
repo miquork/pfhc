@@ -14,7 +14,7 @@
   // For Gamjet code (v6.30/04)
   //gROOT->ProcessLine(".L pfhadronsRun3.C+g");
   //gROOT->ProcessLine(".L PFEnergyCalibrationFromMikko.cc+g");
-  gROOT->ProcessLine(".L piongun.C+g");
+  gROOT->ProcessLine(".L piongun.C++g");
 
   gROOT->ProcessLine(".L PFAna.C+g");
 

@@ -44,7 +44,7 @@ void setMinErr(TH1D *h, double minErr) {
   }
 }
 
-void drawPiongun(string file = "", bool isClosure = false) {
+void drawPiongun(string file = "", string tag = "", bool isClosure = false) {
 
   TDirectory *curdir = gDirectory;
   setTDRStyle();
@@ -95,13 +95,16 @@ void drawPiongun(string file = "", bool isClosure = false) {
   // Draw hadron detection efficiency in 2D
   /////////////////////////////////////////
 
-  const double maxe1 = 300; // 5000
+  const double maxe1 = 5000;//300; // 5000
   const double maxe2 = 5000;//1000; // 5000
   
   TH1D *h1e = tdrHist("h1e","|#eta_{gen}|",0,3.139,
-		      "p_{T,gen} (GeV)",0.2,maxe1);
+		      "p_{T,gen} (GeV)",0.1,maxe1);
+  h1e->GetXaxis()->SetMoreLogLabels(kFALSE);
   extraText = "Private";
-  lumi_136TeV = "Winter25v2 piongun";
+  //lumi_136TeV = "Winter25v2 piongun";
+  //lumi_136TeV = "Winter25 2025MOYv4 piongun";
+  lumi_136TeV = "Simulation";
   TCanvas *c1e = tdrCanvas("c1e",h1e,8,11,kRectangular);
   gPad->SetLogx();
   gPad->SetRightMargin(0.15);
@@ -115,8 +118,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   //l->DrawLine(3.5,0,3.5,1.479);
   l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
-  l->DrawLine(0.2,1.479,300,1.479);
-  l->DrawLine(0.2,2.500,300,2.500);
+  l->DrawLine(0.1,1.479,maxe1,1.479);
+  l->DrawLine(0.1,2.500,maxe1,2.500);
   
   gPad->RedrawAxis();
   gPad->Update();
@@ -127,24 +130,27 @@ void drawPiongun(string file = "", bool isClosure = false) {
   /////////////////////////////////////////
   
   TH1D *h1e1 = tdrHist("h1e1","Efficiency",0,1.2,
-		       "p_{T,gen} (GeV)",0.2,maxe1);
+		       "p_{T,gen} (GeV)",0.1,maxe1);
+  h1e1->GetXaxis()->SetMoreLogLabels(kFALSE);
   TCanvas *c1e1 = tdrCanvas("c1e1",h1e1,8,11,kSquare);
   gPad->SetLogx();
 
   l->SetLineStyle(kSolid);
   l->SetLineColor(kGray+2);
   //l->DrawLine(3.5,0,3.5,1);
+  l->DrawLine(500.,0,500.,1);
   l->DrawLine(5.0,0,5.0,1);
   l->DrawLine(2.5,0,2.5,1);
   l->DrawLine(0.7,0,0.7,0.5);
-  l->DrawLine(0.2,0.84,300,0.84);
-  l->DrawLine(0.2,1.00,300,1.00);
+  l->DrawLine(0.1,0.84,maxe1,0.84);
+  l->DrawLine(0.1,1.00,maxe1,1.00);
   
   tdrDraw(pe_bb,"Pz",kNone,kBlue);
   tdrDraw(pe_ec1,"Pz",kNone,kGreen+2);
   tdrDraw(pe_ec2,"Pz",kNone,kRed);
 
-  TLegend *leg2e = tdrLeg(0.60,0.65-0.05*3,0.85,0.65);
+  //TLegend *leg2e = tdrLeg(0.60,0.65-0.05*3,0.85,0.65);
+  TLegend *leg2e = tdrLeg(0.45,0.65-0.05*3,0.70,0.65);
   leg2e->AddEntry(pe_bb,"BB","PLE");
   leg2e->AddEntry(pe_ec1,"EC1","PLE");
   leg2e->AddEntry(pe_ec2,"EC2","PLE");
@@ -157,7 +163,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   /////////////////////////////////////////////////////////
   
   TH1D *h2h = tdrHist("h1h","|#eta_{gen}|",0,3.139,
-		      "p_{T,gen} (GeV)",0.2,maxe1);
+		      "p_{T,gen} (GeV)",0.1,maxe1);
+  h2h->GetXaxis()->SetMoreLogLabels(kFALSE);
   TCanvas *c2h = tdrCanvas("c2h",h2h,8,11,kRectangular);
   gPad->SetLogx();
   gPad->SetRightMargin(0.15);
@@ -177,8 +184,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
   //l->DrawLine(3.5,0,3.5,1.479);
   l->DrawLine(5.0,0,5.0,1.479);
   l->DrawLine(2.5,1.479,2.5,3.139);
-  l->DrawLine(0.2,1.479,300,1.479);
-  l->DrawLine(0.2,2.500,300,2.500);
+  l->DrawLine(0.1,1.479,maxe1,1.479);
+  l->DrawLine(0.1,2.500,maxe1,2.500);
   
   gPad->RedrawAxis();
   gPad->Update();
@@ -432,7 +439,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
   ////////////////////////////////////////////
   
   TH1D *h4f1 = tdrHist("h4f1","(Fraction or) Response",
-		       0.0, isClosure ? 1.7 : 1.3,
+		       0.0, isClosure ? 1.7 : 1.5,
 		       "f_{ECAL,raw}",0.,1.0);
   if (isClosure) h4f1->SetYTitle("(Fraction or) Response closure");
   TCanvas *c4f1 = tdrCanvas("c4f1",h4f1,8,11,kSquare);
@@ -441,7 +448,7 @@ void drawPiongun(string file = "", bool isClosure = false) {
   TF1 *f1rf = new TF1("f1rf","[0]*(1-x)+[1]*x",0,1);
   TF1 *f1rfm = new TF1("f1rfm","[0]+[1]*(x-0.5)",0,1);
   
-  double vx[] = {5, 10, 20, 40, 80, 160, 320, 1280};//640};
+  double vx[] = {5, 10, 20, 40, 80, 160, 320};//, 1280};//640};
   const int nx = sizeof(vx)/sizeof(vx[0]);
   int color[] = {kBlue, kGreen+2, kYellow+2, kOrange+1, kRed, kBlack, kGray+1};
   const int nc = sizeof(color)/sizeof(color[0]);
@@ -684,7 +691,8 @@ void drawPiongun(string file = "", bool isClosure = false) {
 	    
 	  tdrDraw(hfe,"Pz",kNone,color[((ipt-ipt5)/4)%nc],kSolid,-1);
 	  
-	  if (ieta==1) {
+	  //if (ieta==1) {
+	  if (ieta==20) {
 	    leg5f->AddEntry(hfe,Form("[%1.0f,%1.0f] GeV",ptmin,ptmax),"PLE");
 	  }
 	  

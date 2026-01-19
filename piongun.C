@@ -28,7 +28,7 @@ bool filterP = false;//true;//false;//v1
 bool filterC = true;
 
 // Subtract Random Cone (necessary for withPU, optional for noPU)
-bool subRC = true;
+bool subRC = false;//true;
 
 // Testing corrections from Conrado stored in tuple
 bool usePFHC = false;//true;//false;
@@ -36,7 +36,7 @@ bool usePFEC = false;
 
 // Testing corrections in PFEnergyCalibrationFromMikko.cc + piongun*.txt
 bool applyPFEC_Charged = false;        // use charged/true energy
-bool applyPFEC_Neutral = false;//true;//false; // use calorimeter energy
+bool applyPFEC_Neutral = true;//false; // use calorimeter energy
 
 void piongun::Loop()
 {
@@ -91,8 +91,8 @@ void piongun::Loop()
   fChain->SetBranchStatus("ecal",1);
   //fChain->SetBranchStatus("rawHcal",1);
   fChain->SetBranchStatus("hcal",1);
-  fChain->SetBranchStatus("rcEcal",1);
-  fChain->SetBranchStatus("rcHcal",1);
+  if (subRC) fChain->SetBranchStatus("rcEcal",1);
+  if (subRC) fChain->SetBranchStatus("rcHcal",1);
   //fChain->SetBranchStatus("ho",1);
   //if (filterP) fChain->SetBranchStatus("p",1);
   if (filterP) fChain->SetBranchStatus("trkP",1);
