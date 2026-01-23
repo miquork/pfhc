@@ -549,7 +549,8 @@ void drawPiongun(string file = "", string tag = "", bool isClosure = false) {
   double refae = (isClosure ? 0 : 1.25);
   
   c5f->cd(neta);
-  TLegend *leg5f = tdrLeg(0.05,0.90-0.05*1.5*6,0.55,0.90);
+  tex->DrawLatex(0.05,0.85,Form("%s",tag.c_str()));
+  TLegend *leg5f = tdrLeg(0.05,0.80-0.05*1.5*6,0.55,0.80);
 
   // Load full eta,pT,f_ECAL 3D map of single-pion response
   TProfile3D *p3 = (TProfile3D*)f->Get("p3rf"); assert(p3);
@@ -754,6 +755,8 @@ void drawPiongun(string file = "", string tag = "", bool isClosure = false) {
     double ptmax = emax/cosh(eta);
     double emaxe = 5000.;
     double ptmaxe = emaxe/cosh(eta);
+    double eref = 50.; // HCalRespCorrs reference energy
+    double ptref = eref/cosh(eta);
     
     double fixm_a = 0;//0.60; // 0 for free
     double fixm_h = 0;//0.70; // 0 for free
@@ -1081,13 +1084,15 @@ void drawPiongun(string file = "", string tag = "", bool isClosure = false) {
     l->SetLineStyle(kDashed);
     l->SetLineColor(kGray+1);
     l->DrawLine(0.2,1,maxe2,1);
+    l->DrawLine(ptref,0.,ptref,1.3);
 
     l->SetLineStyle(kDotted);
     l->DrawLine(ptmax,0.,ptmax,1.3);
 
     tex->SetTextSize(0.045*1.5);
     tex->SetNDC();
-    tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+    //tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+    tex->DrawLatex(ieta%6==1 ? 0.15 : 0.05,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
 
     //tdrDraw(ph,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0, 0.7);
     tdrDraw(hh,"Pz",kFullCircle,kRed, kSolid,-1,kNone,0, 0.7);
@@ -1125,8 +1130,20 @@ void drawPiongun(string file = "", string tag = "", bool isClosure = false) {
       legi->SetY2NDC(0.90-0.05*9);
       legi->SetX1NDC(0.20);
       legi->SetX2NDC(0.45);
-    }
 
+      c5_h3->cd(neta);
+
+      tex->SetTextSize(1.5*0.045);
+      tex->SetNDC();
+      tex->DrawLatex(0.05,0.87,Form("%s",tag.c_str()));
+      TLegend *leg3 = tdrLeg(0.05,0.80-2*4*0.045,0.80,0.80);
+      leg3->SetTextSize(1.5*0.045);
+      leg3->AddEntry(hh,"H (f_{ECAL}<0.01)","PLE");
+      leg3->AddEntry(hea,"EH (0.1<f_{ECAL}<0.9)","");
+      leg3->AddEntry(hea,"E (f_{ECAL}#rightarrow0.5)","PLE");
+      leg3->AddEntry(heh,"H of E (f_{ECAL}#rightarrow0)","PLE");
+    }
+  
     // Redraw fe-dependence after pT-fits as a sanity check
     TF1 *f1f2 = new TF1("f1f2","[0]*(1-x)+[1]*x",0,1);
     for (int ipt = p2->GetNbinsX(); ipt !=0; --ipt) {
@@ -1504,13 +1521,14 @@ void drawPiongun(string file = "", string tag = "", bool isClosure = false) {
     tdrDraw(mg["eh_eta"][ix],"Pz",kOpenCircle,kOrange+1,kSolid,-1,kNone,0,0.6);
     
     //TLegend *leg8 = tdrLeg(0.35,0.90-0.045*6,0.60,0.90);
-    TLegend *leg8 = tdrLeg(0.35,0.90-0.045*3,0.60,0.90);
+    TLegend *leg8 = tdrLeg(0.35,0.90-0.045*4,0.60,0.90);
+    leg8->SetHeader(Form("p_{T} = %1.0f GeV",vx[ix]));
     //leg8->AddEntry(mg["a_eta"][ix],"All hadrons","PLE");
     leg8->AddEntry(mg["h_eta"][ix],"H (fE<0.01)","PLE");
     //leg8->AddEntry(mg["e_eta"][ix],"E (0.20<fE<0.80)","PLE");
     //leg8->AddEntry(mg["ea_eta"][ix],"E (fE#rightarrow0.5)","PLE");
-    leg8->AddEntry(mg["eh_eta"][ix],"H of E (fE#rightarrow0)","PLE");
-    leg8->AddEntry(mg["ee_eta"][ix],"E of E (fE#rightarrow1)","PLE");
+    leg8->AddEntry(mg["eh_eta"][ix],"H of EH (fE#rightarrow0)","PLE");
+    leg8->AddEntry(mg["ee_eta"][ix],"E of EH (fE#rightarrow1)","PLE");
     
     gPad->RedrawAxis();
     c8->SaveAs(Form("pdf/drawPionGun_respVsEta_pt%1.0f.pdf",vx[ix]));

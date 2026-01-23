@@ -21,13 +21,16 @@
 void drawPiongunResolution(string file = "",//piongun_Winter25_v3.root",
 			   string file2 = "piongun_Winter25_PFHC_closure.root",
 			   string name1 = " (PFPL)",//"",
-			   string name2 = " (PFHC)") {
+			   string name2 = " (PFHC)",
+			   string tag = "Winter25 MCv4") {
   
   TDirectory *curdir = gDirectory;
   setTDRStyle();
 
   gROOT->ProcessLine(".! mkdir pdf");
   gROOT->ProcessLine(".! mkdir pdf/vsEta");
+  gROOT->ProcessLine(".! touch pdf");
+  gROOT->ProcessLine(".! touch pdf/vsEta");
 
   
   // Open the ROOT file containing p3rf
@@ -288,6 +291,8 @@ void drawPiongunResolution(string file = "",//piongun_Winter25_v3.root",
   
   TCanvas *c3 = new TCanvas("c5","c5",6*300,5*300); // 1800x1500
   c3->Divide(6,5,0,0);
+  TCanvas *c3_h3 = new TCanvas("c5_h3","c5_h3",6*300,5*300); // 1800x1500
+  c3_h3->Divide(6,5,0,0);
   TCanvas *c3r = new TCanvas("c5r","c5r",6*300,5*300); // 1800x1500
   c3r->Divide(6,5,0,0);
   const int neta = 6*5;
@@ -437,34 +442,65 @@ void drawPiongunResolution(string file = "",//piongun_Winter25_v3.root",
     f1a->Draw("SAME");
 
     gPad->RedrawAxis();
+
+
+    c3_h3->cd(ieta);
+    gPad->SetLogx();
+
+    TH1D *h_h3 = tdrHist(Form("h_h3_%d",ieta),"Resolution (RMS)",0+eps,1.0-eps,
+			 "p_{T,gen} (GeV)",0.2*(1+eps),1000.*(1-eps));
+    h_h3->Draw();
+
+    tex->SetTextSize(0.045*1.5);
+    tex->DrawLatex(0.50,0.87,Form("%1.3f#leq|#eta|<%1.3f",eta-deta,eta+deta));
+
+    TH1D *hh_h3 = (TH1D*)hh->Clone(Form("hh_h3_%d",ieta));
+    TH1D *he_h3 = (TH1D*)he->Clone(Form("he_h3_%d",ieta));
+    TH1D *ha_h3 = (TH1D*)ha->Clone(Form("ha_h3_%d",ieta));
+      
+    tdrDraw(hh_h3, "Pz", kOpenSquare, kRed, kSolid, -1, kNone, 0, 0.8);
+    tdrDraw(he_h3, "Pz", kOpenCircle, kBlue, kSolid, -1, kNone, 0, 0.8);
+    tdrDraw(ha_h3, "Pz", kFullCircle, kBlack, kSolid, -1, kNone, 0, 0.8);
+
+    TF1 *f1hh_h3 = (TF1*)f1hh->DrawClone("SAME");
+    f1hh_h3->SetLineColor(kRed);
+    TF1 *f1hh_h3_0 = (TF1*)f1hh_0->DrawClone("SAME");
+    f1hh_h3_0->SetLineColor(kRed);
+
+    TF1 *f1eh_h3 = (TF1*)f1eh->DrawClone("SAME");
+    f1eh_h3->SetLineColor(kBlue);
+    TF1 *f1eh_h3_0 = (TF1*)f1eh_0->DrawClone("SAME");
+    f1eh_h3_0->SetLineColor(kBlue);
+
+    TF1 *f1a_h3 = (TF1*)f1a->DrawClone("SAME");
+    TF1 *f1a_h3_0 = (TF1*)f1a_0->DrawClone("SAME");
+
+    gPad->RedrawAxis();
+    gPad->Update();
     
     // Draw legend in the last empty pad
     if (ieta==1) {
       c3->cd(neta);
 
-      TLegend *leg = tdrLeg(0.05,0.95-2*6*0.045,0.80,0.95);
+      TLegend *leg = tdrLeg(0.05,0.95-2*7*0.045,0.80,0.95);
       leg->SetTextSize(1.5*0.045);
-      /*
-      leg->AddEntry(ha,"All hadrons","PLE");
-      leg->AddEntry(hh,"H hadrons","PLE");
-      leg->AddEntry(he,"EH hadrons","PLE");
 
-      leg->AddEntry(hab,"All (PFHC)","F");
-      leg->AddEntry(hhb,"H (PFHC)","F");
-      leg->AddEntry(heb,"EH (PFHC)","F");
-      */
+      leg->SetHeader(tag.c_str());
       leg->AddEntry(ha,Form("All hadrons%s",name1.c_str()),"PLE");
       leg->AddEntry(hh,Form("H hadrons%s",name1.c_str()),"PLE");
       leg->AddEntry(he,Form("EH hadrons%s",name1.c_str()),"PLE");
       leg->AddEntry(hab,Form("All hadrons%s",name2.c_str()),"F");
       leg->AddEntry(hhb,Form("H hadrons%s",name2.c_str()),"F");
       leg->AddEntry(heb,Form("EH hadrons%s",name2.c_str()),"F");
-      
-      /*(
-      leg->AddEntry(hab,"All (Winter24)","F");
-      leg->AddEntry(hhb,"H (Winter24)","F");
-      leg->AddEntry(heb,"EH (Winter24)","F");
-      */
+
+      c3_h3->cd(neta);
+      TLegend *leg3 = tdrLeg(0.05,0.95-2*4*0.045,0.80,0.95);
+      leg3->SetTextSize(1.5*0.045);
+
+      leg3->SetHeader(tag.c_str());
+      leg3->AddEntry(ha,"all hadrons","PLE");
+      leg3->AddEntry(hh,"H hadrons","PLE");
+      leg3->AddEntry(he,"EH hadrons","PLE");
     }
 
     // Store results also in an individual canvas for better eta bin control
@@ -516,6 +552,7 @@ void drawPiongunResolution(string file = "",//piongun_Winter25_v3.root",
   } // for ieta
   
   c3->SaveAs("pdf/drawPiongunResolution_2D.pdf");
+  c3_h3->SaveAs("pdf/drawPiongunResolution_2D_3.pdf");
   
   // Clean up
   //f->Close();

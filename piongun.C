@@ -24,8 +24,9 @@ double maxP = 500;//5000;
 // Filter with p>0 and/or charge!=0
 // Without this |eta|<2.322 high E end seems bad
 // (Nuclear interactions? With cut efficiency at high E is low)
+// Trye turning both off for 2026v2
 bool filterP = false;//true;//false;//v1
-bool filterC = true;
+bool filterC = true;//false;//true;
 
 // Subtract Random Cone (necessary for withPU, optional for noPU)
 bool subRC = false;//true;
@@ -36,7 +37,10 @@ bool usePFEC = false;
 
 // Testing corrections in PFEnergyCalibrationFromMikko.cc + piongun*.txt
 bool applyPFEC_Charged = false;        // use charged/true energy
-bool applyPFEC_Neutral = true;//false; // use calorimeter energy
+bool applyPFEC_Neutral = false;//true;//false; // use calorimeter energy
+
+// Make plost for depth1 studies
+bool doDepth1 = true;
 
 void piongun::Loop()
 {
@@ -101,6 +105,8 @@ void piongun::Loop()
   
   if (usePFHC) fChain->SetBranchStatus("PFHC_energy",1);
   if (usePFEC) fChain->SetBranchStatus("PFEC_energy",1);
+
+  if (doDepth1) fChain->SetBranchStatus("hcalDepthFractions",1);
   
   Long64_t nentries = fChain->GetEntriesFast();
   
@@ -114,11 +120,19 @@ void piongun::Loop()
   const int neta = sizeof(veta) / sizeof(veta[0]) - 1;
 
   // Inclusive jets pT binning adapted to single particle gun (x2 to x4)
+  // Add extra threshold at 200 GeV, move 507 to 500 to match sample edges
   double vpt[] =
     {0.2, 0.3, 0.4, 0.5, 0.7, 1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0,
      5, 6, 8, 10, 12, 15, 18, 21, 24, 28, 32, 37, 43, 49, 56, 64, 74, 84,
-     97, 133, 174, 220, 272, 330, 395, 507, 592, 686, 790, 905, 1032,
+     //97, 133, 174, 220, 272, 330, 395, 507, 592, 686, 790, 905, 1032,
+     97, 133, 174, 200., 220, 272, 330, 395, 500., 592, 686, 790, 905, 1032,
      1327, 1684, 2116, 2640, 3273, 4037, 5000};
+  double vptf[] =
+    {0.2, 0.3, 0.4, 0.5, 0.7, 1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5,
+     5, 6, 7, 8, 9, 10., 12, 15, 18, 21, 24, 28, 32, 37, 43, 49, 56, 64, 74, 84,
+     97, 114, 133, 153, 174, 200., 220, 245, 272, 300, 330, 362, 395, 430, 468,
+     500., 592, 686, 790, 905, 1032,
+     1327, 1684, 2116, 2640, 3273, 4037, 5000.};
   //97, 114, 133, 153, 174, 196, 220, 245, 272, 300, 330, 362, 395, 430, 468,
   //507, 592, 686, 790, 905, 1032, 1327, 1684, 2116, 2640, 3273, 4037, 5000};
   //507, 548, 592, 638, 686, 737, 790, 846, 905, 967, //1000,
@@ -129,6 +143,7 @@ void piongun::Loop()
   //2640, 2787, 2941, 3103, 3273, 3450, 3637, 3832, 4037, 4252, 4477, 4713,
   //5000};//4961, 5220, 5492, 5777, 6076, 6389, 6717, 7000};
   double npt = sizeof(vpt) / sizeof(vpt[0]) - 1;
+  double nptf = sizeof(vptf) / sizeof(vptf[0]) - 1;
 
   /*
   const int nfe = 20;
@@ -161,10 +176,37 @@ void piongun::Loop()
 
   // MIP energy threshold in ECAL for considering hadron an H-hadron
   double e_mip = 1.;
-  
-  TProfile2D *p2e_trk, *p2e, *p2h, *p2r_a, *p2r_h, *p2r_e;
+
+  // General particle distribution for uniformity checks
+  TH2D *h2np = new TH2D("h2np",";p_{gen};#eta_{gen};",npt,vpt,10*32,0,3.2);
+  TH2D *h2npt = new TH2D("h2npt",";p_{T,gen};#eta_{gen};",npt,vpt,10*32,0,3.2);
+
+  // Efficiencies and H-hadron fractions
+  TProfile2D *p2e_trk, *p2e_cal, *p2e_sel, *p2e_had, *p2e_has;
   p2e_trk = new TProfile2D("p2e_trk",";p_{T,gen} (GeV);#eta_{gen};"
-			   "Tracking efficiency",npt,vpt, 4*32, 0,3.2);
+			   "Tracking efficiency only",npt,vpt, 10*32, 0,3.2);
+  p2e_cal = new TProfile2D("p2e_cal",";p_{T,gen} (GeV);#eta_{gen};"
+			   "Calorimeter efficiency only",npt,vpt, 10*32, 0,3.2);
+  p2e_sel = new TProfile2D("p2e_sel",";p_{T,gen} (GeV);#eta_{gen};"
+			   "Selection efficiency",npt,vpt, 10*32, 0,3.2);
+  p2e_had = new TProfile2D("p2e_had",";p_{T,gen} (GeV);#eta_{gen};"
+			   "H-hadron fraction",npt,vpt, 10*32, 0,3.2);
+  p2e_has = new TProfile2D("p2e_has",";p_{T,gen} (GeV);#eta_{gen};"
+			   "H-hadron fraction after efficiency",
+			   npt,vpt, 10*32, 0,3.2);
+
+  TProfile2D *p2r_all, *p2r_hhh, *p2r_ehh;
+  p2r_all = new TProfile2D("p2r_all",";p_{T,gen} (GeV);#eta_{gen};"
+			   "Hadron response",
+			   npt,vpt, 10*32, 0,3.2);
+  p2r_hhh = new TProfile2D("p2r_hhh",";p_{T,gen} (GeV);#eta_{gen};"
+			   "H-hadron response",
+			   npt,vpt, 10*32, 0,3.2);
+  p2r_ehh = new TProfile2D("p2r_ehh",";p_{T,gen} (GeV);#eta_{gen};"
+			   "EH-hadron response",
+			   npt,vpt, 10*32, 0,3.2);
+  
+  TProfile2D *p2e, *p2h, *p2r_a, *p2r_h, *p2r_e;
   p2e = new TProfile2D("p2e",";p_{T,gen} (GeV);#eta_{gen};Efficiency",
 		       npt,vpt, neta,veta);
   p2h = new TProfile2D("p2h",";p_{T,gen} (GeV);#eta_{gen};H fraction",
@@ -227,7 +269,38 @@ void piongun::Loop()
 		 neta,veta, npt,vpt, nr,vr);
   h3c = new TH3D("h3c",";|#eta_{gen}|;p_{T,gen} (GeV);Correction^{-1};",
 		 neta,veta, npt,vpt, nr,vr);
-  
+
+
+  // For depth1 studies
+  const int np1 = 8;
+  TProfile2D *p2r(0), *p2re(0), *p2rh(0);
+  TProfile *vpf1[np1];
+  TProfile *vph1[np1];
+  TProfile *vpe1[np1];
+  TProfile *vpr1[np1];
+  if (doDepth1) {
+    fout->mkdir("depth1");
+    fout->cd("depth1");
+
+    p2r = new TProfile2D("p2r",";p_{T,gen};f_{depth1};Response",nptf,vptf, nfe,vfe);
+    p2re = new TProfile2D("p2re",";p_{T,gen};f_{depth1};Response (e>0)",nptf,vptf, nfe,vfe);
+    p2rh = new TProfile2D("p2rh",";p_{T,gen};f_{depth1};Response (e=0)",nptf,vptf, nfe,vfe);
+      
+    for (int i = 0; i != np1; ++i) {
+      vpf1[i] = new TProfile(Form("pf1_%d",i),";p_{T,gen};Depth1 category fraction;",nptf,vptf);
+    }
+    for (int i = 0; i != np1; ++i) {
+      vph1[i] = new TProfile(Form("ph1_%d",i),";p_{T,gen};Depth1 HCAL fraction;",nptf,vptf);
+    }
+    for (int i = 0; i != np1; ++i) {
+      vpe1[i] = new TProfile(Form("pe1_%d",i),";p_{T,gen};Depth1 energy fraction;",nptf,vptf);
+    }
+    for (int i = 0; i != np1; ++i) {
+      vpr1[i] = new TProfile(Form("pr1_%d",i),";p_{T,gen};Depth1 category response;",nptf,vptf);
+    } // for i
+    fout->cd();
+  } // doDepth1
+    
   // Store new PFEC as a friend treee
   TFile *outFriend(0);
   TTree *friendTree(0);
@@ -278,8 +351,10 @@ void piongun::Loop()
 		  //&& genP>0 && (charge!=0 || abseta>2.65) ? 1 : 0);
 		  //&& genP>0 && (charge!=0 || abseta>2.5) ? 1 : 0);
 		  //(!filterC || (charge!=0 || abseta>2.322)) ? 1 : 0); // W25
-    		  (!filterC  || ((charge!=0 && abseta<2.6) ||
-				 (charge==0 && abseta>=2.6)))  // 2025v2
+    		  //(!filterC  || ((charge!=0 && abseta<2.6) ||
+		  //		 (charge==0 && abseta>=2.6)))  // 2025v2
+		  (!filterC  || ((charge!=0 && abseta<2.6) ||
+				 (charge==0 && abseta>=2.6)))  // 2026v2
 		  ? 1 : 0);
     //(!filterC || (charge!=0 || abseta>2.65)) ? 1 : 0); // W24
     bool ish = (fe<0.01);// as in drawPionGun.C
@@ -325,7 +400,18 @@ void piongun::Loop()
     if (applyPFEC_Charged || applyPFEC_Neutral) friendTree->Fill();
     resp *= corr;
 
+    h2np->Fill(genP, abseta);
+    h2npt->Fill(genPt, abseta);
+
     p2e_trk->Fill(genPt, abseta, charge!=0);
+    p2e_cal->Fill(genPt, abseta, (rawEcal+rawHcal)>0);
+    p2e_sel->Fill(genPt, abseta, eff);
+    p2e_had->Fill(genPt, abseta, ish ? 1 : 0);
+    if (eff>0) p2e_has->Fill(genPt, abseta, ish ? 1 : 0);
+    if (eff>0) p2r_all->Fill(genPt, abseta, resp);
+    if (eff>0 && ish) p2r_hhh->Fill(genPt, abseta, resp);
+    if (eff>0 && ise) p2r_ehh->Fill(genPt, abseta, resp);
+    
     p2e->Fill(genPt, abseta, eff);
     if (abseta<0.522) pe_bb0->Fill(genPt, eff);
     if (abseta<1.479) pe_bb->Fill(genPt, eff);
@@ -369,11 +455,45 @@ void piongun::Loop()
       h3c->Fill(abseta, genPt, 1./corr);
     } // eff>0
 
-  }
+
+    // Depth1 studies
+    if (doDepth1 && charge!=0 && genP>0 && fabs(genEta)<1.305) {
+
+      double f1 = hcalDepthFractions[0];
+      double e1 = hcalDepthFractions[0] * rawHcal / genP;
+      double rp = (rawEcal+rawHcal) / genP;
+      int cat(-1);
+      if (rawEcal==0  && rawHcal>0  && f1==1)        cat = 0;
+      if (rawEcal==0  && rawHcal>0  && f1>0 && f1<1) cat = 1;
+      if (rawEcal==0  && rawHcal>0  && f1==0)        cat = 2;
+      if (rawEcal>0   && rawHcal>0  && f1==1)        cat = 3;
+      if (rawEcal>0   && rawHcal>0  && f1>0 && f1<1) cat = 4;
+      if (rawEcal>0   && rawHcal>0  && f1==0)        cat = 5;
+      if (rawEcal>0   && rawHcal==0)                 cat = 6;
+      if (rawEcal==0  && rawHcal==0)                 cat = 7;
+      assert(cat>=0);
+
+      double f = (rawEcal+rawHcal>0 ? f1 * rawHcal / (rawHcal+rawEcal) : 0.);
+      p2r->Fill(genP, f, rp);
+      if (rawEcal>0)   p2re->Fill(genP, f, rp);
+      if (rawEcal==0)  p2rh->Fill(genP, f, rp);
+      
+      for (int i = 0; i != np1; ++i) {
+	vpf1[i]->Fill(genP, i==cat ? 1 : 0);
+	if (i==cat) {
+	  vph1[i]->Fill(genP, f1);
+	  vpe1[i]->Fill(genP, e1);
+	  vpr1[i]->Fill(genP, rp);
+	}
+      } // for i
+    } // doDepth1
+  } // for jentry
 
   fout->Write();
   fout->Close();
 
-  friendTree->Write();
-  outFriend->Close();
+  if (applyPFEC_Charged || applyPFEC_Neutral) {
+    friendTree->Write();
+    outFriend->Close();
+  }
 }

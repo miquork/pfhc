@@ -4,6 +4,9 @@
 
 //R__LOAD_LIBRARY(piongun.C+g);
 R__LOAD_LIBRARY(piongun_C.so);
+R__LOAD_LIBRARY(drawPiongun_C.so);
+R__LOAD_LIBRARY(drawPiongunResolution_C.so);
+R__LOAD_LIBRARY(drawPiongunEfficiency_C.so);
 
 void mk_piongun() {
 
@@ -41,12 +44,21 @@ void mk_piongun() {
   */
 
   // PFHC26 version v1
-  string tag = "PFHC26_GTv9_2025MOYv4";
+  /*
+  //string tag = "PFHC26_GTv9_2025MOYv4";
+  string tag = "PFHC26v3";
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E0p2to10_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E0p2to200_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E200to500_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E500to5000_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4.root");
+  */
 
+  // With power law corrections
+  string tag = "PFHC26v3";
+  c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E0p2to10_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
+  c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E0p2to200_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
+  c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E200to500_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
+  c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E500to5000_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
 
   // New withRC Winter25v2 (beamspot+HE scale)
   //c->AddFile("../data/piongun/2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU_bfix_v2.root"); // baseline v2, "HB1X", has hcal>0 cut
@@ -95,5 +107,14 @@ void mk_piongun() {
   drawPiongun("piongun.root",tag);
 
   gROOT->ProcessLine(Form(".! cp -pi drawPiongun.root drawPiongun_%s.root",ct));
+
+  gROOT->ProcessLine(".L drawPiongunResolution.C+g");
+  drawPiongunResolution();//"piongun.root","","","",tag);
+
+  //gROOT->ProcessLine(Form(".! cp -pi drawPiongunResolution.root drawPiongunResolution_%s.root",ct));
+
+  gROOT->ProcessLine(".L drawPiongunEfficiency.C+g");
+  drawPiongunEfficiency();
+
   
 } // mk_piongun
