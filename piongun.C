@@ -26,18 +26,24 @@ double maxP = 500;//5000;
 // (Nuclear interactions? With cut efficiency at high E is low)
 // Trye turning both off for 2026v2
 bool filterP = false;//true;//false;//v1
-bool filterC = true;//false;//true;
+bool filterC = false;//true;//false;//true;
+
+// Filter with response>0.1 to get rid of outliers with R~0
+bool filterR = true;
+double RfilterMin = 0.1;
+double RfilterMax = 1.6;
+double RfilterEHMax = 1.2;
 
 // Subtract Random Cone (necessary for withPU, optional for noPU)
 bool subRC = false;//true;
 
 // Testing corrections from Conrado stored in tuple
 bool usePFHC = false;//true;//false;
-bool usePFEC = false;
+bool usePFEC = false;//true;//false;
 
 // Testing corrections in PFEnergyCalibrationFromMikko.cc + piongun*.txt
 bool applyPFEC_Charged = false;        // use charged/true energy
-bool applyPFEC_Neutral = false;//true;//false; // use calorimeter energy
+bool applyPFEC_Neutral = true;//false; // use calorimeter energy
 
 // Make plost for depth1 studies
 bool doDepth1 = true;
@@ -272,32 +278,54 @@ void piongun::Loop()
 
 
   // For depth1 studies
-  const int np1 = 8;
+  const int np1(8);
   TProfile2D *p2r(0), *p2re(0), *p2rh(0);
+  TProfile *ph1e(0), *ph1h(0), *ph1a(0); 
   TProfile *vpf1[np1];
   TProfile *vph1[np1];
   TProfile *vpe1[np1];
+  TProfile *vpe2[np1];
   TProfile *vpr1[np1];
+  const int nd1(10);
+  TProfile *vpd1[np1];
+  TH2D *vh2d1[np1];
   if (doDepth1) {
     fout->mkdir("depth1");
     fout->cd("depth1");
 
-    p2r = new TProfile2D("p2r",";p_{T,gen};f_{depth1};Response",nptf,vptf, nfe,vfe);
-    p2re = new TProfile2D("p2re",";p_{T,gen};f_{depth1};Response (e>0)",nptf,vptf, nfe,vfe);
-    p2rh = new TProfile2D("p2rh",";p_{T,gen};f_{depth1};Response (e=0)",nptf,vptf, nfe,vfe);
+    p2r = new TProfile2D("p2r",";p_{gen};f_{depth1};Response",nptf,vptf, nfe,vfe);
+    p2re = new TProfile2D("p2re",";p_{gen};f_{depth1};Response (e>0)",nptf,vptf, nfe,vfe);
+    p2rh = new TProfile2D("p2rh",";p_{gen};f_{depth1};Response (e=0)",nptf,vptf, nfe,vfe);
+
+    ph1e = new TProfile("ph1e",";p_{gen};Depth1 HCAL energy fraction (E-hadrons)",nptf,vptf);
+    ph1h = new TProfile("ph1h",";p_{gen};Depth1 HCAL energy fraction (H-hadrons)",nptf,vptf);
+    ph1a = new TProfile("ph1a",";p_{gen};Depth1 HCAL energy fraction (all hadrons)",nptf,vptf);
       
     for (int i = 0; i != np1; ++i) {
-      vpf1[i] = new TProfile(Form("pf1_%d",i),";p_{T,gen};Depth1 category fraction;",nptf,vptf);
+      vpf1[i] = new TProfile(Form("pf1_%d",i),";p_{gen};Depth1 category fraction;",nptf,vptf);
     }
     for (int i = 0; i != np1; ++i) {
-      vph1[i] = new TProfile(Form("ph1_%d",i),";p_{T,gen};Depth1 HCAL fraction;",nptf,vptf);
+      vph1[i] = new TProfile(Form("ph1_%d",i),";p_{gen};Depth1 HCAL fraction;",nptf,vptf);
     }
     for (int i = 0; i != np1; ++i) {
-      vpe1[i] = new TProfile(Form("pe1_%d",i),";p_{T,gen};Depth1 energy fraction;",nptf,vptf);
+      vpe1[i] = new TProfile(Form("pe1_%d",i),";p_{gen};Depth1 energy fraction;",nptf,vptf);
     }
     for (int i = 0; i != np1; ++i) {
-      vpr1[i] = new TProfile(Form("pr1_%d",i),";p_{T,gen};Depth1 category response;",nptf,vptf);
+      vpe2[i] = new TProfile(Form("pe2_%d",i),";p_{gen};Depth!=1 energy fraction;",nptf,vptf);
+    }
+    for (int i = 0; i != np1; ++i) {
+      vpr1[i] = new TProfile(Form("pr1_%d",i),";p_{gen};Depth1 category response;",nptf,vptf);
     } // for i
+
+    for (int i = 0; i != nd1; ++i) {
+      double scale = 0.5+i*0.1;
+      vpd1[i] = new TProfile(Form("pd1_%d",i),Form(";p_{gen};Pion response with depth 1 scale = %1.1f;",scale),nptf,vptf);
+    }
+    for (int i = 0; i != nd1; ++i) {
+      double scale = 0.5+i*0.1;
+      vh2d1[i] = new TH2D(Form("h2d1_%d",i),Form(";p_{gen};Pion response with depth 1 scale = %1.1f;",scale),nptf,vptf,200,0,2);
+    }
+    
     fout->cd();
   } // doDepth1
     
@@ -345,6 +373,8 @@ void piongun::Loop()
 		  (!usePFHC || (pfhcE>0 && pfhcE<13000.)) &&
 		  (!filterMaxP || (genP<maxP)) &&
 		  (!filterP || (p>0 || abseta>2.6)) &&
+		  (!filterR || ((resp>RfilterMin && resp<RfilterMax) &&
+				(resp<RfilterEHMax || fe<0.2))) &&
 		  //(!filterP || (p>0 || abseta>2.5)) &&
 		  //&& genP>0 ? 1 : 0);
 		  //&& genP>0 && charge!=0 ? 1 : 0);
@@ -461,6 +491,7 @@ void piongun::Loop()
 
       double f1 = hcalDepthFractions[0];
       double e1 = hcalDepthFractions[0] * rawHcal / genP;
+      double e2 = (1-hcalDepthFractions[0]) * rawHcal / genP;
       double rp = (rawEcal+rawHcal) / genP;
       int cat(-1);
       if (rawEcal==0  && rawHcal>0  && f1==1)        cat = 0;
@@ -477,15 +508,39 @@ void piongun::Loop()
       p2r->Fill(genP, f, rp);
       if (rawEcal>0)   p2re->Fill(genP, f, rp);
       if (rawEcal==0)  p2rh->Fill(genP, f, rp);
+
+      if (rawEcal>0)   ph1e->Fill(genP, f1);
+      if (rawEcal==0)  ph1h->Fill(genP, f1);
+      ph1a->Fill(genP, f1);
       
       for (int i = 0; i != np1; ++i) {
 	vpf1[i]->Fill(genP, i==cat ? 1 : 0);
 	if (i==cat) {
 	  vph1[i]->Fill(genP, f1);
 	  vpe1[i]->Fill(genP, e1);
+	  vpe2[i]->Fill(genP, e2);
 	  vpr1[i]->Fill(genP, rp);
 	}
       } // for i
+
+      for (int i = 0; i != nd1; ++i) {
+	double scale1 = 0.5 + i*0.1;
+	double h1 = rawHcal * hcalDepthFractions[0];
+	double h2 = rawHcal * (1-hcalDepthFractions[0]);
+	//  int i = ph1h->GetXaxis()->FindBin(50.); ph1h->GetBinContent(i)
+	double h1avg = 0.1131;
+	double h2avg = 1-h1avg;
+	// Require that scale1*h1avg + scale2*h2avg = h1avg + h2avg
+	// for H-hadron sample as in HCAL IsoTrack calibration
+	double scale2 = (h1avg+h2avg-scale1*h1avg)/h2avg;
+	double h1new = scale1*h1;
+	double h2new = scale2*h2;
+	double rawHcalNew = h1new + h2new;
+	double rpnew = (rawEcal + rawHcalNew) / genP;
+	vpd1[i]->Fill(genP, rpnew);
+	vh2d1[i]->Fill(genP, rpnew);
+      }
+      
     } // doDepth1
   } // for jentry
 

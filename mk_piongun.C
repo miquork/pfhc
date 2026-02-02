@@ -52,14 +52,31 @@ void mk_piongun() {
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E200to500_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E500to5000_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4.root");
   */
-
+  /*
   // With power law corrections
   string tag = "PFHC26v3";
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E0p2to10_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E0p2to200_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E200to500_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
   c->AddFile("../data/piongun/FikriPFHC26/MERGED/Ntuples_Pi_E500to5000_Winter25_NoPU_GTv9_HcalRespCorrs2025MOYv4_PFHCPowerLaw.root");
+  */
+  // Winter26 samples
+  //string tag = "Winter26_PFEC_noChargeCut";
+  //c->AddFile("../data/piongun/Conrado_Winter26/NTuples_with_corrections_fixing2025corr/2026_0p2to10GeV_withCorrections_and_PowerLaw_NoPU.root");
+  //c->AddFile("../data/piongun/Conrado_Winter26/NTuples_with_corrections_fixing2025corr/2026_0p2to200GeV_withCorrections_and_PowerLaw_NoPU.root");
+  //c->AddFile("../data/piongun/Conrado_Winter26/NTuples_with_corrections_fixing2025corr/2026_200to500GeV_withCorrections_and_PowerLaw_NoPU.root");
+  //c->AddFile("../data/piongun/Conrado_Winter26/NTuples_with_corrections_fixing2025corr/2026_500to5000GeV_withCorrections_and_PowerLaw_NoPU.root");
 
+  // Updated charged hadron treatment when track is missing
+  //string tag = "Winter26test4";
+  //string tag = "Winter26v4";
+  string tag = "PFEC26v4";
+  c->AddFile("../data/piongun/Conrado_Winter26_test4/NTuples_with_corrections_unfixing2025corr_addingChargedHadPFCandsToNeutralHadrons/2026_0p2to10GeV_withCorrections_and_PowerLaw_NoPU_addingChargedPFCands.root");
+  c->AddFile("../data/piongun/Conrado_Winter26_test4/NTuples_with_corrections_unfixing2025corr_addingChargedHadPFCandsToNeutralHadrons/2026_0p2to200GeV_withCorrections_and_PowerLaw_NoPU_addingChargedPFCands.root");
+  c->AddFile("../data/piongun/Conrado_Winter26_test4/NTuples_with_corrections_unfixing2025corr_addingChargedHadPFCandsToNeutralHadrons/2026_200to500GeV_withCorrections_and_PowerLaw_NoPU_addingChargedPFCands.root");
+  c->AddFile("../data/piongun/Conrado_Winter26_test4/NTuples_with_corrections_unfixing2025corr_addingChargedHadPFCandsToNeutralHadrons/2026_500to5000GeV_withCorrections_and_PowerLaw_NoPU_addingChargedPFCands.root");
+  
+  
   // New withRC Winter25v2 (beamspot+HE scale)
   //c->AddFile("../data/piongun/2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU_bfix_v2.root"); // baseline v2, "HB1X", has hcal>0 cut
   //c->AddFile("../data/piongun/2025_0p2to5000GeV_withCorrections_and_PowerLaw_NoPU_bfix.root"); // baseline v1, no hcal>0 cut? // Last baseline from 2025

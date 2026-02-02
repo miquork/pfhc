@@ -50,7 +50,8 @@ PFEnergyCalibration::PFEnergyCalibration() {
 //#include "piongun_Winter25_v3.txt"
 //#include "piongun_Winter24_v9v10.txt"
 //#include "piongun_Winter25v2NoPu.txt"
-#include "piongun_PFHC26v1.txt"
+//#include "piongun_PFHC26v1.txt"
+#include "piongun_PFHC26v4.txt"
 void PFEnergyCalibration::energyEmHad(double t, double& e, double& h, double eta, double phi) const {
 
   // Save input energies in const form
